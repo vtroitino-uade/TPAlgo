@@ -2,7 +2,7 @@
 
 ## Requisitos
 
-- Python 3.8+ instalado en tu sistema.
+- Python 3 instalado en tu sistema.
 - `virtualenv` instalado. Si no lo tienes, puedes instalarlo ejecutando:
 
     ```bash
