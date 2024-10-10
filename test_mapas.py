@@ -1,6 +1,6 @@
 '''
 . -> Vacio
-S -> Es el punto de aparacion del personaje
+S -> Es el punto de aparicion del personaje
 P -> Pasillo que conecta las habitaciones
 X -> Es donde puede aparecer un tipo de habitacion
 RY...Y -> Indica que es una habitacion, se debe especificar el tipo de la misma en la Y.
@@ -45,4 +45,4 @@ selected_layout = LAYOUTS[random.randint(0, len(LAYOUTS) - 1)]
 for row in selected_layout:
     for tile in row:
         print(tile.lstrip())
-    print("\n")
+    print("", end='\n')

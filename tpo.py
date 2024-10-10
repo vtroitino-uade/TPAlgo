@@ -1,13 +1,51 @@
-"""
-hola
-"""
+'''
+. -> Vacio
+S -> Es el punto de aparicion del personaje
+P -> Pasillo que conecta las habitaciones
+X -> Es donde puede aparecer un tipo de habitacion
+RY...Y -> Indica que es una habitacion, se debe especificar el tipo de la misma en la Y.
+          Se puede poner mas de una Y si se desea una habitacion de varios tipos.
+RE -> Habitacion de Enemigos
+RP -> Habitacion de Puzzle
+RM -> Habitacion de Criatura
+RC -> Habuitacion de Recompensa
+B -> Boss Final
+'''
 
 import random
 import os
 import time
 
+TILE_SIZE = 5
 
-def DelayedPrint(*values, delayChar=0.03, delayLine=0.3):
+LAYOUT_1 = [
+    ['RM','.','X','P','B'],
+    ['P','.','P','.','.'],
+    ['X','P','X','P','RM'],
+    ['P','.','P','.','.'],
+    ['S','P','X','P','RM'],
+]
+LAYOUT_2 = [
+    ['RM','.','X','P','B'],
+    ['P','.','P','.','.'],
+    ['X','P','S','P','RM'],
+    ['P','.','P','.','X'],
+    ['RM','P','X','P','P'],
+]
+LAYOUT_3 = [
+    ['RM','.','X','P','B'],
+    ['P','.','P','.','.'],
+    ['X','P','X','P','RM'],
+    ['P','.','P','.','.'],
+    ['S','P','X','P','RM'],
+]
+
+LAYOUTS = [ LAYOUT_1, LAYOUT_2, LAYOUT_3 ]
+
+
+
+
+def delayed_print(values, delay_char=0.03):
     '''
         Imprime caracteres uno a la vez.
     '''
@@ -15,11 +53,7 @@ def DelayedPrint(*values, delayChar=0.03, delayLine=0.3):
         print(
             character, end=""
         )
-        time.sleep(delayChar)
-
-    # time.sleep(``
-    #     delayLine
-    # )
+        time.sleep(delay_char)
     print()
 
 
@@ -32,9 +66,9 @@ def story(chapter):
 
 
     ]
-    DelayedPrint(text[chapter])
+    delayed_print(text[chapter])
 
-def input_with_validation(input_text: str, convert_to="", input_range=None) -> any:
+def input_with_validation(input_text: str, input_range=None) -> any:
     """
         Valida el input segun los parametros
     """
@@ -46,21 +80,19 @@ def input_with_validation(input_text: str, convert_to="", input_range=None) -> a
             time.sleep(1)
             os.system("cls")
             continue
-        var = eval(f"{convert_to}({var})")
         if not input_range and var not in range(input_range[0], input_range[1]):
             print("Ingreso invalido. Intente de nuevo.")
             continue
 
-        return var
+        return int(var)
 
 
 def iterate_options(options):
     """
         Itera varias opciones en menúes que lo requieran
     """
-    for i, option in enumerate(options, 1):
-        time.sleep(0.3)
-        print(f"{i}. {option}")
+    for i in range(len(options)):
+        print(f"{i+1}. {options[i]}")
 
 
 def menu(options, input_text, header) -> None:
@@ -73,8 +105,8 @@ def menu(options, input_text, header) -> None:
     print(header)
     iterate_options(options)
     time.sleep(0.3)
-    while response == "error":
-        response = input_with_validation(input_text, "int", [1, len(options)])
+    response = input_with_validation(input_text, [1, len(options)])
+
     return response
 
 def start_menu():
@@ -95,18 +127,11 @@ def game():
     time.sleep(1)
     story(0)
 
-    create_map()
-def create_available_rooms():
-    '''
-    Crea las habitaciones disponibles
-    '''
-    room_events = ['chest', 'enemy', 'puzzle']
-    room_numbers = range(1,10)
+    #create_map()
 def create_map():
-    '''
-    Crea el mapa
-    '''
-    available_rooms = create_available_rooms()
+    layout = random.choice(LAYOUTS)
+    return layout
+
 
 
 def main():
@@ -116,6 +141,6 @@ def main():
     start_menu()
 
 
-# main()
+main()
 # input_with_validation("Ingrese:","int", [1, 4])
-game()
+#game()
