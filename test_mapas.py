@@ -1,5 +1,6 @@
 '''
-. -> Vacío
+. -> Vacío / No se muestra nada
++ -> Posición del personaje
 S -> Es el punto de aparición del personaje
 P -> Pasillo que conecta las habitaciones
 X -> Es donde puede aparecer un tipo de habitación

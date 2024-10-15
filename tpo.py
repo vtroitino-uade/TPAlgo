@@ -1,14 +1,15 @@
 '''
-. -> Vacio
-S -> Es el punto de aparicion del personaje
+. -> Vacío / No se muestra nada
++ -> Posición del personaje
+S -> Es el punto de aparición del personaje
 P -> Pasillo que conecta las habitaciones
-X -> Es donde puede aparecer un tipo de habitacion
-RY...Y -> Indica que es una habitacion, se debe especificar el tipo de la misma en la Y.
-          Se puede poner mas de una Y si se desea una habitacion de varios tipos.
-RE -> Habitacion de Enemigos
-RP -> Habitacion de Puzzle
-RM -> Habitacion de Criatura
-RC -> Habuitacion de Recompensa
+X -> Es donde puede aparecer un tipo de habitación
+RY...Y -> Indica que es una habitación, se debe especificar el tipo de la misma en la Y.
+          Se puede poner mas de una Y si se desea una habitación de varios tipos.
+RE -> Habitación de Enemigos
+RP -> Habitación de Puzzle
+RM -> Habitación de Criatura
+RC -> Habitación de Recompensa
 B -> Boss Final
 '''
 
@@ -41,9 +42,6 @@ LAYOUT_3 = [
 ]
 
 LAYOUTS = [ LAYOUT_1, LAYOUT_2, LAYOUT_3 ]
-
-
-
 
 def delayed_print(values, delay_char=0.03):
     '''
