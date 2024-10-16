@@ -72,6 +72,7 @@ def input_with_validation(input_text: str, error_text: str, input_range: range) 
     """
     while True:
         var = input(input_text)
+        time.sleep(0.1)
         if not var.isdigit():
             print(error_text)
             time.sleep(1)
@@ -117,7 +118,21 @@ def check_current_pos():
             if '+' in cell:
                 actual_row = layout.index(row)
                 actual_cell = row.index(cell)
-    return actual_cell, actual_row
+    current_pos = [actual_cell, actual_row]
+    return current_pos
+
+def update_current_pos(old_pos, new_pos):
+    '''
+        Busca la posicion vieja para reemplazar el caracter especial en la nueva posicion
+    '''
+    layout = LAYOUT_2
+    x,y = old_pos
+    character_pos = layout[y][x]
+    layout[y][x] = character_pos.replace('+', '')
+
+    x,y = new_pos
+    character_pos = layout[y][x]
+    layout[y][x] += '+'
 
 def check_available_ways(current_pos):
     '''
@@ -129,7 +144,7 @@ def check_available_ways(current_pos):
     move_options = []
     layout = LAYOUT_2
     bottom_row_index = len(layout) - 1
-    rightmost_cell_index = len(layout[actual_row])
+    rightmost_cell_index = len(layout[actual_row] )- 1
     
     if actual_row < bottom_row_index:
         if layout[actual_row + 1][actual_cell] != '.':
@@ -137,37 +152,44 @@ def check_available_ways(current_pos):
     if actual_row > 0:
         if layout[actual_row - 1][actual_cell] != '.':
             move_options.append('arriba')
-    if actual_cell > 0:
+    if actual_cell < rightmost_cell_index:
         if layout[actual_row][actual_cell + 1] != '.':
             move_options.append('derecha')
-    if actual_cell > rightmost_cell_index:
+    if actual_cell > 0:
         if layout[actual_row][actual_cell - 1] != '.':
             move_options.append('izquierda')
-    print(move_options)
-    
     return move_options
 
 def move_input(options, current_pos):
     '''
-    Input para moverse
+        Input para moverse
     '''
     for i in range(len(options)):
         print(str(i+1) + '. ' + options[i])
-    choice= input_with_validation('¿Para donde vas? ', 'Ah, buscando burlar el sendero, ¿crees que el destino se distrae tan fácilmente?',range(1,len(options)+1))
-    index = options[choice-1]
-    new_pos = character_movement(index, current_pos)
+    choice= input_with_validation('¿Para donde vas? ', 'Ah, buscando burlar el sendero, ¿crees ' +
+                                  'que el destino se distrae tan fácilmente?', 
+                                  range(1, len(options)+1))
+    new_pos = character_movement(choice-1, current_pos, options)
     return new_pos
 
-def character_movement(index, current_pos):
+def character_movement(index, current_pos, options):
     '''
         Funcion que mueve al personaje
     '''
-    
-    x_change = [0, 0, -2, 2]
-    y_change = [2, -2, 0, 0]
+    x_change = 0
+    y_change = 0
+    if options[index] == 'arriba':
+        y_change = -2
+    elif options[index] == 'abajo':
+        y_change = 2
+    elif options[index] == 'izquierda':
+        x_change = -2
+    elif options[index] == 'derecha':
+        x_change = 2
+
     x, y = current_pos[0], current_pos[1]
-    x += x_change[index]
-    y += y_change[index]
+    x += x_change
+    y += y_change
 
     current_pos = [x, y]
 
@@ -190,11 +212,12 @@ def game():
     os.system('cls')
     print('Empecemos...')
     time.sleep(1)
-    story(0)
+    #story(0)
     while True:
-
         current_pos = check_current_pos()
-        new_pose = move_input(check_available_ways(current_pos), current_pos)
+        new_pos = move_input(check_available_ways(current_pos), current_pos)
+        update_current_pos(current_pos, new_pos)
+        os.system('cls')
 
 # ------ Combate -----
 def spawn():
@@ -211,8 +234,8 @@ def main():
     start_menu()
 
 
-main()
+#main()
 #check_available_ways()
 
 # input_with_validation("Ingrese:","int", [1, 4])
-#game()
+game()
