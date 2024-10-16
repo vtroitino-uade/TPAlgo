@@ -54,9 +54,9 @@ def generar_plano_aleatorio() -> list:
 
     posibles_habitaciones = ['.RE', '.RP', '.RC', '.REC', '.RPE', '.REE', '.RPC']
 
-    for y, fila in enumerate(plano_seleccionado):
-        for x, casilla in enumerate(fila):
-            if casilla == 'X':
+    for y in range(len(plano_seleccionado)):
+        for x in range(len(plano_seleccionado[y])):
+            if plano_seleccionado[y][x] == 'X':
                 plano_seleccionado[y][x] = random.choices(posibles_habitaciones,
                                               weights=[0.5, 0.1, 0.1, 0.1, 0.05, 0.1, 0.05],
                                               k=1)[0]
@@ -64,12 +64,14 @@ def generar_plano_aleatorio() -> list:
 
 plano = generar_plano_aleatorio()
 
+print('Plano generado:', plano)
+
 def generar_mapa():
     '''
         Genera el mapa completo.
     '''
-    for y, fila in enumerate(plano):
-        for x, _ in enumerate(fila):
+    for y in range(len(plano)):
+        for x in range(len(plano[y])):
             crear_habitacion(plano[y][x], x, y)
 
 def crear_habitacion(tipo_casilla: str, plano_x: int, plano_y: int) -> list:
