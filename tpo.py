@@ -27,11 +27,11 @@ LAYOUT_1 = [
     ['S','P','X','P','RM'],
 ]
 LAYOUT_2 = [
-    ['RM','.','X','P','B'],
+    ['+RM','.','X','P','B'],
     ['P','.','P','.','.'],
-    ['X','P','+S','P','RM'],
+    ['X','P','S','P','RM'],
     ['P','.','P','.','X'],
-    ['RM','P','X','P','P'],
+    ['RM','P','X','P','RM'],
 ]
 LAYOUT_3 = [
     ['RM','.','X','P','B'],
@@ -112,7 +112,10 @@ def check_current_pos():
     '''
         Devuelve la posición actual del personaje
     '''
+    actual_cell = 0
+    actual_row = 0
     layout = LAYOUT_2
+
     for row in layout:
         for cell in row:
             if '+' in cell:
@@ -145,7 +148,7 @@ def check_available_ways(current_pos):
     layout = LAYOUT_2
     bottom_row_index = len(layout) - 1
     rightmost_cell_index = len(layout[actual_row] )- 1
-    
+
     if actual_row < bottom_row_index:
         if layout[actual_row + 1][actual_cell] != '.':
             move_options.append('abajo')
@@ -169,10 +172,10 @@ def move_input(options, current_pos):
     choice= input_with_validation('¿Para donde vas? ', 'Ah, buscando burlar el sendero, ¿crees ' +
                                   'que el destino se distrae tan fácilmente?', 
                                   range(1, len(options)+1))
-    new_pos = character_movement(choice-1, current_pos, options)
+    new_pos = move_character(choice-1, current_pos, options)
     return new_pos
 
-def character_movement(index, current_pos, options):
+def move_character(index, current_pos, options):
     '''
         Funcion que mueve al personaje
     '''
@@ -195,6 +198,14 @@ def character_movement(index, current_pos, options):
 
     return current_pos
 
+def character_movement():
+    '''
+        Controla el movimiento y posicion del personaje dentro del juego
+    '''
+    current_pos = check_current_pos()
+    new_pos = move_input(check_available_ways(current_pos), current_pos)
+    update_current_pos(current_pos, new_pos)
+    os.system('cls')
 # ----- Inicio y controlador de juego ------
 def start_menu():
     """
@@ -214,13 +225,11 @@ def game():
     time.sleep(1)
     #story(0)
     while True:
-        current_pos = check_current_pos()
-        new_pos = move_input(check_available_ways(current_pos), current_pos)
-        update_current_pos(current_pos, new_pos)
-        os.system('cls')
+        character_movement()
+        
 
 # ------ Combate -----
-def spawn():
+def create_character():
     '''a'''
     character = [crit_hit]
 
