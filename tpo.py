@@ -17,32 +17,134 @@ import random
 import os
 import time
 
-TILE_SIZE = 5
+# -------- Mapa y posiciones --------------
+ROOM_WIDTH = 9
+ROOM_HEIGHT = 5
+MAP_DIMENSION = 5
 
-LAYOUT_1 = [
-    ['RM','.','X','P','B'],
-    ['P','.','P','.','.'],
-    ['X','P','X','P','RM'],
-    ['P','.','P','.','.'],
-    ['S','P','X','P','RM'],
-]
-LAYOUT_2 = [
-    ['+RM','.','X','P','B'],
-    ['P','.','P','.','.'],
-    ['X','P','S','P','RM'],
-    ['P','.','P','.','X'],
-    ['RM','P','X','P','RM'],
-]
-LAYOUT_3 = [
-    ['RM','.','X','P','B'],
-    ['P','.','P','.','.'],
-    ['X','P','X','P','RM'],
-    ['P','.','P','.','.'],
-    ['+S','P','X','P','RM'],
-]
+map_grid = []
+for _ in range(ROOM_HEIGHT * MAP_DIMENSION):
+    map_grid.append([' '] * (ROOM_WIDTH * MAP_DIMENSION))
 
-LAYOUTS = [ LAYOUT_1, LAYOUT_2, LAYOUT_3 ]
+def generate_random_map() -> list:
+    '''
+        Selecciona un diseño de mapa aleatorio y lo prepara para su representación.
+    '''
+    layout_1 = [
+        ['.RM','.','X','.P','.B'],
+        ['.P','.','.P','.','.'],
+        ['X','.P','X','.P','.RM'],
+        ['.P','.','.P','.','.'],
+        ['+S','.P','X','.P','.RM'],
+    ]
+    layout_2 = [
+        ['.RM','.','X','.P','.B'],
+        ['.P','.','.P','.','.'],
+        ['X','.P','+S','.P','.RM'],
+        ['.P','.','.P','.','.'],
+        ['.RM','.P','X','.P','X'],
+    ]
+    layout_3 = [
+        ['.RM','.','X','.P','.B'],
+        ['.P','.','.P','.','.'],
+        ['X','.P','X','.P','.RM'],
+        ['.P','.','.P','.','.'],
+        ['+S','.P','X','.P','.RM'],
+    ]
 
+    layouts = [ layout_1, layout_2, layout_3 ]
+    selected_layout = random.choice(layouts)
+
+    possible_rooms = ['.RE', '.RP', '.RC', '.REC', '.RPE', '.REE', '.RPC']
+
+    for y in range(len(selected_layout)):
+        for x in range(len(selected_layout[y])):
+            if selected_layout[y][x] == 'X':
+                selected_layout[y][x] = random.choices(possible_rooms,
+                                              weights=[0.5, 0.1, 0.1, 0.1, 0.05, 0.1, 0.05],
+                                              k=1)[0]
+    return selected_layout
+
+layout = generate_random_map()
+
+def generate_map():
+    '''
+        Genera el mapa completo.
+    '''
+    for y in range(len(layout)):
+        for x in range(len(layout[y])):
+            if 'P' == layout[y][x]:
+                create_path(check_available_ways([x, y]), x * ROOM_WIDTH, y * ROOM_HEIGHT)
+            else:
+                create_room(layout[y][x], x * ROOM_WIDTH, y * ROOM_HEIGHT)
+
+def create_room(cell_type: str, map_x: int, map_y: int) -> list:
+    '''
+        Crea una habitación dentro del mapa.
+    '''
+
+    if '+' == cell_type[0]:
+        map_grid[map_y + 2][map_x + 4] = '8'
+    else:
+        map_grid[map_y + 2][map_x + 4] = ' '
+
+    horizontal_wall = ' '
+    vertical_wall = ' '
+    border = ' '
+
+    if '.' != cell_type[0]:
+        if cell_type.count('S'):
+            horizontal_wall = '-'
+            vertical_wall = '|'
+            border = '@'
+        elif cell_type.count('B'):
+            horizontal_wall = '%'
+            vertical_wall = '%'
+            border = '6'
+        elif cell_type.count('RM'):
+            horizontal_wall = '-'
+            vertical_wall = '|'
+            border = 'M'
+        elif cell_type.count('R'):
+            horizontal_wall = '-'
+            vertical_wall = '|'
+            border = '°'
+
+    map_grid[map_y][map_x] = border
+    map_grid[map_y][(map_x + ROOM_WIDTH) - 1] = border
+    map_grid[(map_y + ROOM_HEIGHT) - 1][map_x] = border
+    map_grid[(map_y + ROOM_HEIGHT) - 1][(map_x + ROOM_WIDTH) - 1] = border
+
+    for x in range(map_x + 1, map_x + ROOM_WIDTH - 1):
+        map_grid[map_y][x] = horizontal_wall
+        map_grid[map_y + (ROOM_HEIGHT - 1)][x] = horizontal_wall
+
+    for y in range(map_y + 1, map_y + ROOM_HEIGHT - 1):
+        map_grid[y][map_x] = vertical_wall
+        map_grid[y][(map_x + ROOM_WIDTH) - 1] = vertical_wall
+
+def create_path(available_ways: list, map_x: int, map_y: int) -> None:
+    '''
+        Crea un pasillo entre habitaciones.
+    '''
+    if 'derecha' in available_ways or 'izquierda' in available_ways:
+        for x in range(map_x, map_x + ROOM_WIDTH):
+            map_grid[map_y + 2][x] = '-'
+    elif 'arriba' in available_ways or 'abajo' in available_ways:
+        for y in range(map_y, map_y + ROOM_HEIGHT):
+            map_grid[y][map_x + 4] = '|'
+
+def display_map() -> None:
+    '''
+        Muestra el mapa en la pantalla.
+    '''
+    current_pos = check_current_pos()
+    unhide_avilable_ways(current_pos)
+    generate_map()
+    for row in map_grid:
+        for cell in row:
+            print(cell, end='')
+        print()
 
 # -------- Consola - Input y prints --------------
 def delayed_print(text, delay_char=0.03):
@@ -105,7 +207,6 @@ def menu(options, input_text, header) -> None:
 
     return response
 
-
 # ------ Movimiento del jugador ------
 
 def check_current_pos():
@@ -114,7 +215,6 @@ def check_current_pos():
     '''
     actual_cell = 0
     actual_row = 0
-    layout = LAYOUT_2
 
     for row in layout:
         for cell in row:
@@ -128,14 +228,13 @@ def update_current_pos(old_pos, new_pos):
     '''
         Busca la posicion vieja para reemplazar el caracter especial en la nueva posicion
     '''
-    layout = LAYOUT_2
     x,y = old_pos
     character_pos = layout[y][x]
     layout[y][x] = character_pos.replace('+', '')
 
     x,y = new_pos
     character_pos = layout[y][x]
-    layout[y][x] += '+'
+    layout[y][x] = character_pos.replace('.', '+') if '.' in character_pos else '+' + character_pos
 
 def check_available_ways(current_pos):
     '''
@@ -145,9 +244,8 @@ def check_available_ways(current_pos):
     actual_row = current_pos[1]
 
     move_options = []
-    layout = LAYOUT_2
     bottom_row_index = len(layout) - 1
-    rightmost_cell_index = len(layout[actual_row] )- 1
+    rightmost_cell_index = len(layout[actual_row]) - 1
 
     if actual_row < bottom_row_index:
         if layout[actual_row + 1][actual_cell] != '.':
@@ -162,6 +260,28 @@ def check_available_ways(current_pos):
         if layout[actual_row][actual_cell - 1] != '.':
             move_options.append('izquierda')
     return move_options
+
+def unhide_avilable_ways(current_pos) -> None:
+    '''
+        Muestra los pasillos.
+    '''
+    actual_cell = current_pos[0]
+    actual_row = current_pos[1]
+
+    bottom_row_index = len(layout) - 1
+    rightmost_cell_index = len(layout[actual_row]) - 1
+    if actual_row < bottom_row_index:
+        if layout[actual_row + 1][actual_cell] != '.':
+            layout[actual_row + 1][actual_cell] = layout[actual_row + 1][actual_cell].replace('.', '')
+    if actual_row > 0:
+        if layout[actual_row - 1][actual_cell] != '.':
+            layout[actual_row - 1][actual_cell] = layout[actual_row - 1][actual_cell].replace('.', '')
+    if actual_cell < rightmost_cell_index:
+        if layout[actual_row][actual_cell + 1] != '.':
+            layout[actual_row][actual_cell + 1] = layout[actual_row][actual_cell + 1].replace('.', '')
+    if actual_cell > 0:
+        if layout[actual_row][actual_cell - 1] != '.':
+            layout[actual_row][actual_cell - 1] = layout[actual_row][actual_cell - 1].replace('.', '')
 
 def move_input(options, current_pos):
     '''
@@ -181,6 +301,7 @@ def move_character(index, current_pos, options):
     '''
     x_change = 0
     y_change = 0
+
     if options[index] == 'arriba':
         y_change = -2
     elif options[index] == 'abajo':
@@ -206,6 +327,7 @@ def character_movement():
     new_pos = move_input(check_available_ways(current_pos), current_pos)
     update_current_pos(current_pos, new_pos)
     os.system('cls')
+
 # ----- Inicio y controlador de juego ------
 def start_menu():
     """
@@ -225,8 +347,9 @@ def game():
     time.sleep(1)
     #story(0)
     while True:
+        display_map()
+        print()
         character_movement()
-        
 
 # ------ Combate -----
 def create_character():
