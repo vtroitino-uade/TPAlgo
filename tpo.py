@@ -11,6 +11,30 @@ RP -> Habitación de Puzzle
 RM -> Habitación de Criatura
 RC -> Habitación de Recompensa
 B -> Boss Final
+
+
+Uso de colores para poder printear las habitaciones ya vistas y posicion actual:
+
+class bcolors:
+    Red = '\033[91m'
+    Green = '\033[92m'
+    Blue = '\033[94m'
+    Cyan = '\033[96m'
+    White = '\033[97m'
+    Yellow = '\033[93m'
+    Magenta = '\033[95m'
+    Grey = '\033[90m'
+    Black = '\033[90m'
+
+    ENDC = '\033[0m' # finalizar
+    BOLD = '\033[1m' # negrita
+    UNDERLINE = '\033[4m' # subrayado
+
+print("Texto de color " f"{bcolors.Red}rojo{bcolors.ENDC}")
+print(f"{bcolors.Yellow}Ahora todo el texto es de color amarillo!{bcolors.ENDC}")
+print(f"{bcolors.Black}{bcolors.BOLD}Ahora todo el texto es de color negro y en negritas!{bcolors.ENDC}")
+print(f"{bcolors.Blue}Ahora todo el texto es de color azul y y solo {bcolors.UNDERLINE}esto en subrayado!{bcolors.ENDC}")
+print("Texto normal")
 '''
 
 import random
@@ -89,7 +113,7 @@ def iterate_options(options: list) -> None:
         Itera varias opciones en menúes que lo requieran
     """
     for i in range(len(options)):
-        print(f"{i+1}. {options[i]}")
+        delayed_print(f"{i+1}. {options[i]}")
 
 def menu(options, input_text, header) -> None:
     """
@@ -231,8 +255,46 @@ def game():
 # ------ Combate -----
 def create_character():
     '''a'''
-    character = [crit_hit]
+    options = ['Un caballero marcado por las sombras de aquellos sacrificios hechos en nombre de ' +
+                'su rey.',
+                'Un erudito que rompió las reglas buscando la magia que mueve el mundo.', 
+                'Un asesino sombrío con una cuenta pendiente, experto en atacar los puntos débiles '
+                + 'de sus presas.']
+    delayed_print('Es hora de que pienses en quien fuiste antes de esta oscura caverna.')
+    iterate_options(options)
+    character_class = input_with_validation('¿Recuerdas quien eras? ', 'Tu pasado ya está definido, solo los elegidos por los Dioses pueden cambiarlo. Y creeme, no eres uno de ellos.', range(1,len(options)+1))
+    delayed_print('Así que eso eres... esperemos que tus pecados hoy te ayuden.')
+    create_character_class(character_class)
 
+def create_character_class(character):
+    '''
+    Se selecciona una clase de las disponibles
+    '''
+    classes = [knight, mage, assassin]
+    return classes[character]()
+
+
+def knight():
+    '''
+        Se crean los stats para el personaje caballero
+
+        stats segun index:
+    '''
+    dice_weights = [1] * 20
+    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
+            [50, 500, dice_weights, 75]]
+    return stats
+
+def mage():
+    '''
+        Se crean los stats para el personaje mago
+
+        stats segun index:
+    '''
+    dice_weights = [1] * 9 + [3 * 11]
+    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
+            [35, 400, dice_weights, 75]]
+    return stats
 def crit_hit():
     '''a'''
 
@@ -247,4 +309,5 @@ def main():
 #check_available_ways()
 
 # input_with_validation("Ingrese:","int", [1, 4])
-game()
+#game()
+create_character()
