@@ -11,6 +11,28 @@ RP -> Habitación de Puzzle
 RM -> Habitación de Criatura
 RC -> Habitación de Recompensa
 B -> Boss Final
+Uso de colores para poder printear las habitaciones ya vistas y posicion actual:
+
+class bcolors:
+    Red = '\033[91m'
+    Green = '\033[92m'
+    Blue = '\033[94m'
+    Cyan = '\033[96m'
+    White = '\033[97m'
+    Yellow = '\033[93m'
+    Magenta = '\033[95m'
+    Grey = '\033[90m'
+    Black = '\033[90m'
+
+    ENDC = '\033[0m' # finalizar
+    BOLD = '\033[1m' # negrita
+    UNDERLINE = '\033[4m' # subrayado
+
+print("Texto de color " f"{bcolors.Red}rojo{bcolors.ENDC}")
+print(f"{bcolors.Yellow}Ahora todo el texto es de color amarillo!{bcolors.ENDC}")
+print(f"{bcolors.Black}{bcolors.BOLD}Ahora todo el texto es de color negro y en negritas!{bcolors.ENDC}")
+print(f"{bcolors.Blue}Ahora todo el texto es de color azul y y solo {bcolors.UNDERLINE}esto en subrayado!{bcolors.ENDC}")
+print("Texto normal")
 '''
 
 import random
@@ -23,8 +45,7 @@ ROOM_HEIGHT = 5
 MAP_DIMENSION = 5
 
 map_grid = []
-for _ in range(ROOM_HEIGHT * MAP_DIMENSION):
-    map_grid.append([' '] * (ROOM_WIDTH * MAP_DIMENSION))
+is_boss_unlocked = False
 
 def generate_random_map() -> list:
     '''
@@ -289,10 +310,18 @@ def move_input(options, current_pos):
     '''
     for i in range(len(options)):
         print(str(i+1) + '. ' + options[i])
-    choice= input_with_validation('¿Para donde vas? ', 'Ah, buscando burlar el sendero, ¿crees ' +
+    choice = input_with_validation('¿Para donde vas? ', 'Ah, buscando burlar el sendero, ¿crees ' +
                                   'que el destino se distrae tan fácilmente?', 
                                   range(1, len(options)+1))
-    new_pos = move_character(choice-1, current_pos, options)
+    new_pos = move_character(choice - 1, current_pos, options)
+    new_x, new_y = new_pos
+    while 'B' in layout[new_y][new_x] and not is_boss_unlocked:
+        print('El camino esta bloqueado, debes encontrar a los guardianes para poder avanzar.')
+        choice = input_with_validation('¿Para donde vas? ', 'Ah, buscando burlar el sendero, ¿crees ' +
+                                    'que el destino se distrae tan fácilmente?', 
+                                    range(1, len(options)+1))
+        new_pos = move_character(choice - 1, current_pos, options)
+        new_x, new_y = new_pos
     return new_pos
 
 def move_character(index, current_pos, options):
@@ -343,6 +372,10 @@ def game():
         Controlador del juego
     '''
     os.system('cls')
+    # Crea un mapa vacío
+    for _ in range(ROOM_HEIGHT * MAP_DIMENSION):
+        map_grid.append([' '] * (ROOM_WIDTH * MAP_DIMENSION))
+
     print('Empecemos...')
     time.sleep(1)
     #story(0)
