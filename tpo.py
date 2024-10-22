@@ -36,6 +36,7 @@ print("Texto normal")
 '''
 
 import random
+import math
 import os
 import time
 
@@ -255,7 +256,10 @@ def update_current_pos(old_pos, new_pos):
 
     x,y = new_pos
     character_pos = layout[y][x]
-    layout[y][x] = character_pos.replace('.', '+') if '.' in character_pos else '+' + character_pos
+    if '.' in character_pos:
+        layout[y][x] = character_pos.replace('.', '+')
+    else:
+        layout[y][x] = '+' + character_pos
 
 def check_available_ways(current_pos):
     '''
