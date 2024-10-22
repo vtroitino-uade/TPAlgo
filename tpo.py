@@ -83,9 +83,9 @@ def story(chapter):
         Textos relevantes para la historia
     '''
     text = [
-        'Atrapado en las profundidades de unas catacumbas ancestrales, el viajero despertó sin' +
-        'recordar cómo había llegado allí. La única salida estaba sellada por una magia oscura' +
-        'y antigua. En la penumbra, una voz resonó advirtiendo que tres seres poderosos'  +
+        'Atrapado en las profundidades de unas catacumbas ancestrales, el viajero despertó sin ' +
+        'recordar cómo había llegado allí. La única salida estaba sellada por una magia oscura ' +
+        'y antigua. En la penumbra, una voz resonó advirtiendo que tres seres poderosos '  +
         'custodiaban su libertad. Para escapar, debía encontrarlos y enfrentarse a sus pruebas.'
     ]
     delayed_print(text[chapter])
@@ -108,12 +108,12 @@ def input_with_validation(input_text: str, error_text: str, input_range: range) 
             continue
         return var
 
-def iterate_options(options: list) -> None:
+def iterate_options(options: list, delay_char: float = 0.03) -> None:
     """
         Itera varias opciones en menúes que lo requieran
     """
     for i in range(len(options)):
-        delayed_print(f"{i+1}. {options[i]}")
+        delayed_print(f"{i+1}. {options[i]}", delay_char)
 
 def menu(options, input_text, header) -> None:
     """
@@ -247,24 +247,36 @@ def game():
     os.system('cls')
     print('Empecemos...')
     time.sleep(1)
-    #story(0)
+    story(0)
+    combat_stats = create_character()
+    os.system('cls')
     while True:
         character_movement()
-        
+
 
 # ------ Combate -----
 def create_character():
-    '''a'''
+    '''
+        Crea el personaje
+    '''
+    confirmation = 2
     options = ['Un caballero marcado por las sombras de aquellos sacrificios hechos en nombre de ' +
-                'su rey.',
-                'Un erudito que rompió las reglas buscando la magia que mueve el mundo.', 
+                'su rey.', 'Un erudito que rompió las reglas buscando la magia que mueve el mundo.', 
                 'Un asesino sombrío con una cuenta pendiente, experto en atacar los puntos débiles '
                 + 'de sus presas.']
-    delayed_print('Es hora de que pienses en quien fuiste antes de esta oscura caverna.')
-    iterate_options(options)
-    character_class = input_with_validation('¿Recuerdas quien eras? ', 'Tu pasado ya está definido, solo los elegidos por los Dioses pueden cambiarlo. Y creeme, no eres uno de ellos.', range(1,len(options)+1))
+    while confirmation == 2:
+        os.system('cls')
+        delayed_print('Es hora de que pienses en quien fuiste antes de esta oscura caverna.')
+        iterate_options(options)
+        character_class = input_with_validation('¿Recuerdas quien eras? ', 'Tu pasado ya está '  +
+                                            'definido, solo los elegidos por los Dioses pueden ' +
+                                            'cambiarlo. Y creeme, no eres uno de ellos.',
+                                            range(1,len(options)+1))
+        confirmation = input_with_validation('¿Estás seguro?\n1. Si\n2. No\n', 'No evadas la pregunta',
+                                             range(1,3))
     delayed_print('Así que eso eres... esperemos que tus pecados hoy te ayuden.')
-    create_character_class(character_class)
+    stats = create_character_class(character_class - 1)
+    return stats
 
 def create_character_class(character):
     '''
@@ -289,12 +301,21 @@ def mage():
     '''
         Se crean los stats para el personaje mago
 
-        stats segun index:
     '''
-    dice_weights = [1] * 9 + [3 * 11]
+    dice_weights = [1] * 9 + [3] * 11
     stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
             [35, 400, dice_weights, 75]]
     return stats
+
+def assassin():
+    '''
+        Se crean los stats para el personaje mago
+    '''
+    dice_weights = [1] * 20
+    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
+            [50, 500, dice_weights, 110]]
+    return stats
+
 def crit_hit():
     '''a'''
 
@@ -308,6 +329,6 @@ def main():
 #main()
 #check_available_ways()
 
-# input_with_validation("Ingrese:","int", [1, 4])
-#game()
-create_character()
+
+game()
+#create_character()
