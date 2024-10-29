@@ -67,8 +67,9 @@ LAYOUT_3 = [
 
 LAYOUTS = [ LAYOUT_1, LAYOUT_2, LAYOUT_3 ]
 
+stats = None
 # -------- Consola - Input y prints --------------
-def delayed_print(text, delay_char=0.03):
+def delayed_print(text: str, delay_char=0.03):
     '''
         Imprime caracteres uno a la vez.
     '''
@@ -269,6 +270,7 @@ def knight():
     dice_weights = [1] * 20
     stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
             [50, 500, dice_weights, 75]]
+    return stats
 
 def mage():
     '''
@@ -279,15 +281,17 @@ def mage():
     dice_weights = [1] * 9 + [3] * 11
     stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
             [35, 400, dice_weights, 75]]
+    return stats
 
 def assassin():
     '''
-        Se crean los stats para el personaje mago
+        Se crean los stats para el personaje asesino
     '''
     global stats
     dice_weights = [1] * 20
     stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
             [50, 500, dice_weights, 110]]
+    return stats
 
 def boss():
     pass
@@ -324,7 +328,6 @@ def create_character():
     delayed_print('Así que eso eres... esperemos que tus pecados hoy te ayuden.')
     stats = create_character_class(character_class - 1)
 
-
 def create_character_class(character):
     '''
     Se selecciona una clase de las disponibles
@@ -336,6 +339,7 @@ def fight(enemy_type):
     '''
         Ejecuta la pelea
     '''
+    global stats
     # ---- Creacion del enemigo para la pelea ------
     enemy_stats = create_enemy(enemy_type)
     enemy_life = fake_dictionary(enemy_stats[0], 'base_hp', enemy_stats[1])
@@ -350,8 +354,58 @@ def fight(enemy_type):
     crit  = fake_dictionary(stats[0], 'crit_hit', stats[1])
 
     delayed_print('¡Un enemigo salvaje ha aparecido! que vas a hacer?')
+    turn_functions = [player_turn, enemy_turn]
+    turn_choice = random.choice([0,1])
+    if turn_choice == 0:
+        delayed_print('Estás listo para atacar!')
+    else: 
+        delayed_print('El enemigo es más rápido que tú, te ataca primero!')
+    while enemy_life > 0 and life > 0:
+        turn_functions[turn_choice]()
+        turn_choice = 1 - turn_choice
+            
+
+def player_turn():
     iterate_options(['atacar', 'irse'])
-    input_with_validation('Elije rapido!', 'No, no, eso no se puede hacer.', range(1, 3))
+    action = input_with_validation('Elije rapido!', 'No, no, eso no se puede hacer.', range(1, 3))
+    if action == 1:
+        delayed_print('Atacaste al enemigo')
+        enemy_dice, dice = dice_roll(enemy_luck, luck)
+        if dice > enemy_dice:
+            if enemy_dice - dice > 7:
+                enemy_life -= crit
+            else:
+                enemy_life -= attk
+        else:
+            delayed_print('Tu espada choca contra el escudo del enemigo')
+
+        if enemy_life <= 0:
+            delayed_print('¡Venciste al enemigo!')
+            
+            delayed_print('El enemigo te atacó')
+            life -= enemy_attk
+        else:
+            delayed_print('Escapaste de la pelea')
+
+def enemy_turn():
+    
+
+def dice_roll(enemy_luck, luck):
+    '''
+        Funcion que simula el lanzamiento de dados
+    '''
+    enemy_dice = random.choices(range(1, 21), enemy_luck)
+    dice = random.choices(range(1, 21), luck)
+    return enemy_dice, dice
+
+def dice_roll_simulation(dice_rolls, delay=0.1):
+    """
+    Simula una ruleta visual con las tiradas de dados.
+    """
+    for roll in dice_rolls:
+        print(f"\r{roll}", end="")
+        time.sleep(delay)
+    print()
 
 def create_enemy(enemy_type):
     '''
@@ -370,5 +424,5 @@ def main():
     start_menu()
 
 #game()
+create_character()
 fight('base')
-
