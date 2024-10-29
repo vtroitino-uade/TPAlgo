@@ -67,7 +67,6 @@ LAYOUT_3 = [
 
 LAYOUTS = [ LAYOUT_1, LAYOUT_2, LAYOUT_3 ]
 
-
 # -------- Consola - Input y prints --------------
 def delayed_print(text, delay_char=0.03):
     '''
@@ -129,6 +128,13 @@ def menu(options, input_text, header) -> None:
 
     return response
 
+def fake_dictionary(key_array, key, value_array):
+    '''
+        Busca una key en un array con palabras para asociarlo a través de un index a un array
+        con valores y devolver el valor buscado.
+    '''
+    dict_index = key_array.index(key)
+    return value_array[dict_index]
 
 # ------ Movimiento del jugador ------
 
@@ -253,12 +259,53 @@ def game():
     while True:
         character_movement()
 
+# ------- Clases y creacion de personaje y enemigos ----
+def knight():
+    '''
+        Se crean los stats para el personaje caballero
 
-# ------ Combate -----
+    '''
+    global stats
+    dice_weights = [1] * 20
+    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
+            [50, 500, dice_weights, 75]]
+
+def mage():
+    '''
+        Se crean los stats para el personaje mago
+
+    '''
+    global stats
+    dice_weights = [1] * 9 + [3] * 11
+    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
+            [35, 400, dice_weights, 75]]
+
+def assassin():
+    '''
+        Se crean los stats para el personaje mago
+    '''
+    global stats
+    dice_weights = [1] * 20
+    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
+            [50, 500, dice_weights, 110]]
+
+def boss():
+    pass
+
+def final_boss():
+    pass
+
+def base_enemy():
+    dice_weights = [1] * 20
+    enemy_stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
+                   [20, 200, dice_weights, 40]]
+    return enemy_stats
+
 def create_character():
     '''
         Crea el personaje
     '''
+    global stats
     confirmation = 2
     options = ['Un caballero marcado por las sombras de aquellos sacrificios hechos en nombre de ' +
                 'su rey.', 'Un erudito que rompió las reglas buscando la magia que mueve el mundo.', 
@@ -276,7 +323,7 @@ def create_character():
                                              range(1,3))
     delayed_print('Así que eso eres... esperemos que tus pecados hoy te ayuden.')
     stats = create_character_class(character_class - 1)
-    return stats
+
 
 def create_character_class(character):
     '''
@@ -284,40 +331,37 @@ def create_character_class(character):
     '''
     classes = [knight, mage, assassin]
     return classes[character]()
-
-
-def knight():
+# ------ Combate -----
+def fight(enemy_type):
     '''
-        Se crean los stats para el personaje caballero
-
-        stats segun index:
+        Ejecuta la pelea
     '''
-    dice_weights = [1] * 20
-    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
-            [50, 500, dice_weights, 75]]
-    return stats
+    # ---- Creacion del enemigo para la pelea ------
+    enemy_stats = create_enemy(enemy_type)
+    enemy_life = fake_dictionary(enemy_stats[0], 'base_hp', enemy_stats[1])
+    enemy_attk = fake_dictionary(enemy_stats[0], 'base_attack', enemy_stats[1])
+    enemy_luck = fake_dictionary(enemy_stats[0], 'luck', enemy_stats[1])
+    enemy_crit  = fake_dictionary(enemy_stats[0], 'crit_hit', enemy_stats[1])
 
-def mage():
-    '''
-        Se crean los stats para el personaje mago
+    # ---- Creacion del personaje para la pelea ----
+    life = fake_dictionary(stats[0], 'base_hp', stats[1])
+    attk = fake_dictionary(stats[0], 'base_attack', stats[1])
+    luck = fake_dictionary(stats[0], 'luck', stats[1])
+    crit  = fake_dictionary(stats[0], 'crit_hit', stats[1])
 
-    '''
-    dice_weights = [1] * 9 + [3] * 11
-    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
-            [35, 400, dice_weights, 75]]
-    return stats
+    delayed_print('¡Un enemigo salvaje ha aparecido! que vas a hacer?')
+    iterate_options(['atacar', 'irse'])
+    input_with_validation('Elije rapido!', 'No, no, eso no se puede hacer.', range(1, 3))
 
-def assassin():
+def create_enemy(enemy_type):
     '''
-        Se crean los stats para el personaje mago
+        Crea a los enemigos segun el tipo requerido por la pelea
     '''
-    dice_weights = [1] * 20
-    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
-            [50, 500, dice_weights, 110]]
-    return stats
+    enemy_types = ['base', 'boss', 'final']
+    enemy_classes = [base_enemy, boss, final_boss]
 
-def crit_hit():
-    '''a'''
+    enemy = fake_dictionary(enemy_types, enemy_type, enemy_classes)
+    return enemy()
 
 def main():
     """
@@ -325,10 +369,6 @@ def main():
     """
     start_menu()
 
+#game()
+fight('base')
 
-#main()
-#check_available_ways()
-
-
-game()
-#create_character()
