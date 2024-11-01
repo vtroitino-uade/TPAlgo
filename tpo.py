@@ -69,7 +69,7 @@ LAYOUTS = [ LAYOUT_1, LAYOUT_2, LAYOUT_3 ]
 
 stats = None
 # -------- Consola - Input y prints --------------
-def delayed_print(text: str, delay_char=0.03):
+def delayed_print(text: str, delay_char=0.03) -> None:
     '''
         Imprime caracteres uno a la vez.
     '''
@@ -78,7 +78,7 @@ def delayed_print(text: str, delay_char=0.03):
         time.sleep(delay_char)
     print()
 
-def story(chapter):
+def story(chapter: int) -> None:
     '''
         Textos relevantes para la historia
     '''
@@ -97,16 +97,13 @@ def input_with_validation(input_text: str, error_text: str, input_range: range) 
     while True:
         var = input(input_text)
         time.sleep(0.1)
-        if not var.isdigit():
-            print(error_text)
-            time.sleep(1)
-            os.system("cls")
-            continue
-        var = int(var)
-        if not input_range or var not in input_range:
-            print(error_text)
-            continue
-        return var
+        if var.isdigit():
+            var = int(var)
+            if input_range and var in input_range:
+                return var
+        delayed_print(error_text)
+        time.sleep(1)
+        os.system("cls")
 
 def iterate_options(options: list, delay_char: float = 0.03) -> None:
     """
@@ -115,7 +112,7 @@ def iterate_options(options: list, delay_char: float = 0.03) -> None:
     for i in range(len(options)):
         delayed_print(f"{i+1}. {options[i]}", delay_char)
 
-def menu(options, input_text, header) -> None:
+def menu(options:list, input_text:str, header:str) -> None:
     """
         Muestra un menú y pide un input
     """
@@ -124,22 +121,14 @@ def menu(options, input_text, header) -> None:
     print(header)
     iterate_options(options)
     time.sleep(0.3)
-    response = input_with_validation(input_text,'Error de ingreso, vuelve a intentarlo.', 
+    response = input_with_validation(input_text,'Error de ingreso, vuelve a intentarlo.',
                                      range(1,len(options) + 1))
 
     return response
 
-def fake_dictionary(key_array, key, value_array):
-    '''
-        Busca una key en un array con palabras para asociarlo a través de un index a un array
-        con valores y devolver el valor buscado.
-    '''
-    dict_index = key_array.index(key)
-    return value_array[dict_index]
-
 # ------ Movimiento del jugador ------
 
-def check_current_pos():
+def check_current_pos() -> list:
     '''
         Devuelve la posición actual del personaje
     '''
@@ -155,7 +144,7 @@ def check_current_pos():
     current_pos = [actual_cell, actual_row]
     return current_pos
 
-def update_current_pos(old_pos, new_pos):
+def update_current_pos(old_pos: list, new_pos: list) -> None:
     '''
         Busca la posicion vieja para reemplazar el caracter especial en la nueva posicion
     '''
@@ -168,7 +157,7 @@ def update_current_pos(old_pos, new_pos):
     character_pos = layout[y][x]
     layout[y][x] += '+'
 
-def check_available_ways(current_pos):
+def check_available_ways(current_pos: list) -> list:
     '''
         Revisa las opciones de movimiento disponibles
     '''
@@ -194,7 +183,7 @@ def check_available_ways(current_pos):
             move_options.append('izquierda')
     return move_options
 
-def move_input(options, current_pos):
+def move_input(options: list, current_pos: list) -> list:
     '''
         Input para moverse
     '''
@@ -206,7 +195,7 @@ def move_input(options, current_pos):
     new_pos = move_character(choice-1, current_pos, options)
     return new_pos
 
-def move_character(index, current_pos, options):
+def move_character(index: int, current_pos: list, options: list) -> list:
     '''
         Funcion que mueve al personaje
     '''
@@ -255,7 +244,7 @@ def game():
     print('Empecemos...')
     time.sleep(1)
     story(0)
-    combat_stats = create_character()
+    combat_stats = create_character_input()
     os.system('cls')
     while True:
         character_movement()
@@ -264,35 +253,19 @@ def game():
 def knight():
     '''
         Se crean los stats para el personaje caballero
-
+        Stats segun el index = ['base_attack', 'base_hp', 'crit_hit']
     '''
     global stats
-    dice_weights = [1] * 20
-    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
-            [50, 500, dice_weights, 75]]
-    return stats
-
-def mage():
-    '''
-        Se crean los stats para el personaje mago
-
-    '''
-    global stats
-    dice_weights = [1] * 9 + [3] * 11
-    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
-            [35, 400, dice_weights, 75]]
-    return stats
-
+    stats = [50, 600, 75]
+    
 def assassin():
     '''
         Se crean los stats para el personaje asesino
+        Stats segun el index = ['base_attack', 'base_hp', 'crit_hit']
     '''
     global stats
-    dice_weights = [1] * 20
-    stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
-            [50, 500, dice_weights, 110]]
-    return stats
-
+    stats = [50, 500, 110]
+    
 def boss():
     pass
 
@@ -300,19 +273,20 @@ def final_boss():
     pass
 
 def base_enemy():
-    dice_weights = [1] * 20
-    enemy_stats = [['base_attack', 'base_hp', 'luck', 'crit_hit'],
-                   [20, 200, dice_weights, 40]]
+    '''
+        Crea el enemigo base para la pelea
+        stats segun el index = ['base_attack', 'base_hp', 'crit_hit']
+    '''
+    enemy_stats = [20, 200, 40]
     return enemy_stats
 
-def create_character():
+def create_character_input():
     '''
         Crea el personaje
     '''
-    global stats
     confirmation = 2
     options = ['Un caballero marcado por las sombras de aquellos sacrificios hechos en nombre de ' +
-                'su rey.', 'Un erudito que rompió las reglas buscando la magia que mueve el mundo.', 
+                'su rey.', 
                 'Un asesino sombrío con una cuenta pendiente, experto en atacar los puntos débiles '
                 + 'de sus presas.']
     while confirmation == 2:
@@ -326,15 +300,17 @@ def create_character():
         confirmation = input_with_validation('¿Estás seguro?\n1. Si\n2. No\n', 'No evadas la pregunta',
                                              range(1,3))
     delayed_print('Así que eso eres... esperemos que tus pecados hoy te ayuden.')
-    stats = create_character_class(character_class - 1)
+    create_character_class(character_class - 1)
 
 def create_character_class(character):
     '''
     Se selecciona una clase de las disponibles
     '''
-    classes = [knight, mage, assassin]
-    return classes[character]()
+    classes = [knight, assassin]
+    classes[character]()
+
 # ------ Combate -----
+
 def fight(enemy_type):
     '''
         Ejecuta la pelea
@@ -342,28 +318,18 @@ def fight(enemy_type):
     global stats
     # ---- Creacion del enemigo para la pelea ------
     enemy_stats = create_enemy(enemy_type)
-    enemy_life = fake_dictionary(enemy_stats[0], 'base_hp', enemy_stats[1])
-    enemy_attk = fake_dictionary(enemy_stats[0], 'base_attack', enemy_stats[1])
-    enemy_luck = fake_dictionary(enemy_stats[0], 'luck', enemy_stats[1])
-    enemy_crit  = fake_dictionary(enemy_stats[0], 'crit_hit', enemy_stats[1])
-
-    # ---- Creacion del personaje para la pelea ----
-    life = fake_dictionary(stats[0], 'base_hp', stats[1])
-    attk = fake_dictionary(stats[0], 'base_attack', stats[1])
-    luck = fake_dictionary(stats[0], 'luck', stats[1])
-    crit  = fake_dictionary(stats[0], 'crit_hit', stats[1])
+    enemy_life, enemy_attk, enemy_luck, enemy_crit  = get_enemy_stats(enemy_stats)
 
     delayed_print('¡Un enemigo salvaje ha aparecido! que vas a hacer?')
     turn_functions = [player_turn, enemy_turn]
     turn_choice = random.choice([0,1])
     if turn_choice == 0:
         delayed_print('Estás listo para atacar!')
-    else: 
+    else:
         delayed_print('El enemigo es más rápido que tú, te ataca primero!')
     while enemy_life > 0 and life > 0:
         turn_functions[turn_choice]()
         turn_choice = 1 - turn_choice
-            
 
 def player_turn():
     iterate_options(['atacar', 'irse'])
@@ -372,35 +338,22 @@ def player_turn():
         delayed_print('Atacaste al enemigo')
         enemy_dice, dice = dice_roll(enemy_luck, luck)
         if dice > enemy_dice:
-            if enemy_dice - dice > 7:
-                enemy_life -= crit
-            else:
-                enemy_life -= attk
-        else:
-            delayed_print('Tu espada choca contra el escudo del enemigo')
-
-        if enemy_life <= 0:
-            delayed_print('¡Venciste al enemigo!')
-            
-            delayed_print('El enemigo te atacó')
-            life -= enemy_attk
-        else:
-            delayed_print('Escapaste de la pelea')
-
-def enemy_turn():
-    
+            if dice - enemy_dice > 7:
+                delayed_print('¡Golpe crítico!')
+                delayed_print('Tu brazo retumba con la fuerza del golpe.')
+                enemy_life
 
 def dice_roll(enemy_luck, luck):
     '''
         Funcion que simula el lanzamiento de dados
     '''
-    enemy_dice = random.choices(range(1, 21), enemy_luck)
-    dice = random.choices(range(1, 21), luck)
+    enemy_dice = random.randint(1,20)
+    dice = random.randint(1,20)
     return enemy_dice, dice
 
 def dice_roll_simulation(dice_rolls, delay=0.1):
     """
-    Simula una ruleta visual con las tiradas de dados.
+        Simula una ruleta visual con las tiradas de dados.
     """
     for roll in dice_rolls:
         print(f"\r{roll}", end="")
@@ -423,6 +376,5 @@ def main():
     """
     start_menu()
 
-#game()
-create_character()
-fight('base')
+game()
+
