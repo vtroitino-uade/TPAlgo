@@ -228,6 +228,7 @@ def character_movement():
     new_pos = move_input(check_available_ways(current_pos), current_pos)
     update_current_pos(current_pos, new_pos)
     os.system('cls')
+
 # ----- Inicio y controlador de juego ------
 def start_menu():
     """
@@ -246,7 +247,7 @@ def game():
     print('Empecemos...')
     time.sleep(1)
     story(0)
-    combat_stats = create_character_input()
+    create_character_input()
     os.system('cls')
     while True:
         character_movement()
@@ -312,6 +313,20 @@ def create_character_class(character):
     classes[character]()
 
 # ------ Combate -----
+def who_attacks_first():
+    '''
+        Determina quien ataca primero
+    '''
+    global stats
+    delayed_print('¡Un enemigo salvaje ha aparecido! Probemos tu suerte...')
+    dice_roll_simulation([random.randint(1,20), random.randint(1,20)])
+    enemy_dice, dice = dice_roll()
+
+    if dice > enemy_dice:
+        delayed_print('¡Eres más rápido que tu enemigo! Atacas primero.')
+        return 0
+    delayed_print('El enemigo es más rápido, te ataca primero.')
+    return 1
 
 def fight(enemy_type):
     '''
@@ -320,6 +335,7 @@ def fight(enemy_type):
     global stats
     # ---- Creacion del enemigo para la pelea ------
     enemy_stats = create_enemy(enemy_type)
+<<<<<<< HEAD
     delayed_print('¡Un enemigo salvaje ha aparecido! que vas a hacer?')
     turn_functions = [player_turn, enemy_turn]
     turn_choice = random.choice([0,1])
@@ -374,6 +390,29 @@ def enemy_turn(enemy_stats):
 
 
 def dice_roll(enemy_luck, luck):
+=======
+    turn_choice = who_attacks_first()
+    turn_functions = [player_turn, enemy_turn]
+
+    while enemy_stats[1] > 0 and stats[1] > 0:
+        turn_functions[turn_choice]()
+        turn_choice = 1 - turn_choice
+
+def player_turn():
+    iterate_options(['atacar', 'irse'])
+    action = input_with_validation('Elije rapido!', 'No, no, eso no se puede hacer.', range(1, 3))
+    if action == 1:
+        delayed_print('Atacaste al enemigo')
+        enemy_dice, dice = dice_roll(enemy_luck, luck)
+        if dice > enemy_dice:
+            if dice - enemy_dice > 7:
+                delayed_print('¡Golpe crítico!')
+                delayed_print('Tu brazo retumba con la fuerza del golpe.')
+                enemy_life
+def enemy_turn():
+    pass
+def dice_roll():
+>>>>>>> 6337c2f77a0469734306f94dfb4bb2ce2b741adf
     '''
         Funcion que simula el lanzamiento de dados
     '''
@@ -396,8 +435,8 @@ def create_enemy(enemy_type):
     '''
     enemy_types = ['base', 'boss', 'final']
     enemy_classes = [base_enemy, boss, final_boss]
+    enemy = enemy_classes[enemy_types.index(enemy_type)]
 
-    enemy = fake_dictionary(enemy_types, enemy_type, enemy_classes)
     return enemy()
 
 def main():
@@ -406,5 +445,6 @@ def main():
     """
     start_menu()
 
-game()
+#game()
+fight('base')
 
