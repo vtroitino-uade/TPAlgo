@@ -44,25 +44,27 @@ import time
 TILE_SIZE = 5
 
 LAYOUT_1 = [
-    ['RM','.','X','P','B'],
-    ['P','.','P','.','.'],
-    ['X','P','X','P','RM'],
-    ['P','.','P','.','.'],
-    ['S','P','X','P','RM'],
+    ['.BL', '.', '.RP', '.P', '.', '.BF'],
+    ['.P', '.', '.P', '.', '.'],
+    ['.RC', '.P', '.RE', '.P', '.RP'],
+    ['.P', '.', '.P', '.', '.'],
+    ['+S', '.P', '.BI', '.P', '.RE'],
 ]
+
 LAYOUT_2 = [
-    ['+RM','.','X','P','B'],
-    ['P','.','P','.','.'],
-    ['X','P','S','P','RM'],
-    ['P','.','P','.','X'],
-    ['RM','P','X','P','RM'],
+    ['.RC', '.', '.RP', '.P', '.RE', '.B'],
+    ['.P', '.', '.P', '.', '.'],
+    ['.RP', '.P', '+S', '.P', '.RE'],
+    ['.P', '.', '.P', '.', '.BI'],
+    ['.RP', '.P', '.RC', '.P', '.P'],
 ]
+
 LAYOUT_3 = [
-    ['RM','.','X','P','B'],
-    ['P','.','P','.','.'],
-    ['X','P','X','P','RM'],
-    ['P','.','P','.','.'],
-    ['+S','P','X','P','RM'],
+    ['.RE', '.', '.RP', '.P', '.RC'],
+    ['.P', '.', '.P', '.', '.'],
+    ['.BI', '.P', '.RC', '.P', '.RP'],
+    ['.P', '.', '.P', '.', '.'],
+    ['+S', '.P', '.RE', '.P', '.BI'],
 ]
 
 LAYOUTS = [ LAYOUT_1, LAYOUT_2, LAYOUT_3 ]
@@ -318,8 +320,6 @@ def fight(enemy_type):
     global stats
     # ---- Creacion del enemigo para la pelea ------
     enemy_stats = create_enemy(enemy_type)
-    enemy_life, enemy_attk, enemy_luck, enemy_crit  = get_enemy_stats(enemy_stats)
-
     delayed_print('¡Un enemigo salvaje ha aparecido! que vas a hacer?')
     turn_functions = [player_turn, enemy_turn]
     turn_choice = random.choice([0,1])
@@ -328,20 +328,50 @@ def fight(enemy_type):
     else:
         delayed_print('El enemigo es más rápido que tú, te ataca primero!')
     while enemy_life > 0 and life > 0:
-        turn_functions[turn_choice]()
+        turn_functions[turn_choice](enemy_stats)
         turn_choice = 1 - turn_choice
 
-def player_turn():
-    iterate_options(['atacar', 'irse'])
-    action = input_with_validation('Elije rapido!', 'No, no, eso no se puede hacer.', range(1, 3))
-    if action == 1:
-        delayed_print('Atacaste al enemigo')
-        enemy_dice, dice = dice_roll(enemy_luck, luck)
-        if dice > enemy_dice:
-            if dice - enemy_dice > 7:
-                delayed_print('¡Golpe crítico!')
-                delayed_print('Tu brazo retumba con la fuerza del golpe.')
-                enemy_life
+def player_turn(enemy_stats):
+    '''
+        Turno del jugador
+    '''
+    global stats
+    enemy_life, enemy_attk, enemy_luck, enemy_crit  = enemy_stats
+    life, attk, luck, crit = stats
+    delayed_print('Atacaste al enemigo')
+    enemy_dice, dice = dice_roll(enemy_luck, luck)
+    if dice > enemy_dice:
+        if dice - enemy_dice > 7:
+            delayed_print('¡Golpe crítico!')
+            delayed_print('Tu brazo retumba con la fuerza del golpe.')
+            enemy_life  -= crit
+        else:
+            delayed_print('Tu espada corta al enemigo')
+            enemy_life -= attk
+    else:
+        delayed_print('Fallaste el golpe')
+        delayed_print('Tu espada corta el aire con un silbido.')
+    enemy_stats = [enemy_life, enemy_attk, enemy_luck, enemy_crit]
+    return enemy_stats
+
+def enemy_turn(enemy_stats):
+    global stats
+    enemy_life, enemy_attk, enemy_luck, enemy_crit = enemy_stats
+    life, attk, luck, crit = stats
+    enemy_dice, dice = dice_roll(enemy_luck, luck)
+    delayed_print('El enemigo ataca, ¡cuidado!')
+    if dice >= enemy_dice:
+        delayed_print('El enemigo falla el ataque.')
+    else:
+        if enemy_dice - dice > 7:
+            delayed_print('¡Golpe crítico!')
+            delayed_print('El golpe deja una herida profunda')
+            life  -= enemy_crit
+        else:
+            delayed_print('El enemigo te golpea')
+            life -= enemy_attk
+    stats = [life, attk, luck, crit]
+
 
 def dice_roll(enemy_luck, luck):
     '''
@@ -351,12 +381,12 @@ def dice_roll(enemy_luck, luck):
     dice = random.randint(1,20)
     return enemy_dice, dice
 
-def dice_roll_simulation(dice_rolls, delay=0.1):
+def dice_roll_simulation(delay=0.1):
     """
         Simula una ruleta visual con las tiradas de dados.
     """
-    for roll in dice_rolls:
-        print(f"\r{roll}", end="")
+    for i in range(random.randint(10,18)):
+        print(f"\r{random.randint(1,20)}", end="")
         time.sleep(delay)
     print()
 
