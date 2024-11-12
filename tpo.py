@@ -44,39 +44,43 @@ import time
 TILE_SIZE = 5
 
 LAYOUT_1 = [
-    ['.BL', '.', '.RP', '.P', '.', '.BF'],
-    ['.P', '.', '.P', '.', '.'],
-    ['.RC', '.P', '.RE', '.P', '.RP'],
-    ['.P', '.', '.P', '.', '.'],
-    ['+S', '.P', '.BI', '.P', '.RE'],
+    ['RM','.','X','P','B'],
+    ['P','.','P','.','.'],
+    ['X','P','X','P','RM'],
+    ['P','.','P','.','.'],
+    ['+S','P','X','P','RM'],
 ]
-
 LAYOUT_2 = [
-    ['.RC', '.', '.RP', '.P', '.RE', '.B'],
-    ['.P', '.', '.P', '.', '.'],
-    ['.RP', '.P', '+S', '.P', '.RE'],
-    ['.P', '.', '.P', '.', '.BI'],
-    ['.RP', '.P', '.RC', '.P', '.P'],
+    ['+RM','.','X','P','B'],
+    [ 'P','.','P','.','.'],
+    ['X','P','S','P','RM'],
+    ['P','.','P','.','X'],
+    ['RM','P','X','P','RM'],
 ]
-
 LAYOUT_3 = [
-    ['.RE', '.', '.RP', '.P', '.RC'],
-    ['.P', '.', '.P', '.', '.'],
-    ['.BI', '.P', '.RC', '.P', '.RP'],
-    ['.P', '.', '.P', '.', '.'],
-    ['+S', '.P', '.RE', '.P', '.BI'],
+    ['RM','.','X','P','B'],
+    ['P','.','P','.','.'],
+    ['X','P','X','P','RM'],
+    ['P','.','P','.','.'],
+    ['+S','P','X','P','RM'],
 ]
 
 LAYOUTS = [ LAYOUT_1, LAYOUT_2, LAYOUT_3 ]
 
-stats = None
+stats = [50, 600, 75]
+
+items = ['Poción de vida', 'Poción de vida']
 # -------- Consola - Input y prints --------------
-def delayed_print(text: str, delay_char=0.03) -> None:
+def delayed_print(text: str, delay_char=0.03, color=None) -> None:
     '''
-        Imprime caracteres uno a la vez.
+    Imprime caracteres uno a la vez.
     '''
+
     for character in text:
-        print(character, end="")
+        if color:
+            print(f'{color}{character}\033[0m', end="")
+        else:
+            print(f'{character}', end="")
         time.sleep(delay_char)
     print()
 
@@ -105,14 +109,16 @@ def input_with_validation(input_text: str, error_text: str, input_range: range) 
                 return var
         delayed_print(error_text)
         time.sleep(1)
-        os.system("cls")
 
-def iterate_options(options: list, delay_char: float = 0.03) -> None:
+def iterate_options(options: list, delay_char: float = 0.03, color=None) -> None:
     """
         Itera varias opciones en menúes que lo requieran
     """
     for i in range(len(options)):
-        delayed_print(f"{i+1}. {options[i]}", delay_char)
+        if color:
+            delayed_print(f"{i+1}. {options[i]}", color=color, delay_char=delay_char)
+        else:
+            delayed_print(f"{i+1}. {options[i]}", delay_char)
 
 def menu(options:list, input_text:str, header:str) -> None:
     """
@@ -189,11 +195,15 @@ def move_input(options: list, current_pos: list) -> list:
     '''
         Input para moverse
     '''
-    for i in range(len(options)):
-        print(str(i+1) + '. ' + options[i])
-    choice= input_with_validation('¿Para donde vas? ', 'Ah, buscando burlar el sendero, ¿crees ' +
+    choice = 0
+    options.append('Abrir inventario')
+    while choice not in range(1, len(options)):
+        iterate_options(options)
+        choice= input_with_validation('¿Qué vas a hacer? ', 'Ah, buscando burlar el sendero, ¿crees ' +
                                   'que el destino se distrae tan fácilmente?', 
                                   range(1, len(options)+1))
+        if choice == len(options):
+            items_menu()
     new_pos = move_character(choice-1, current_pos, options)
     return new_pos
 
@@ -229,6 +239,16 @@ def character_movement():
     update_current_pos(current_pos, new_pos)
     os.system('cls')
 
+# ----- Habitaciones ------
+def check_room_type(current_pos: list) -> str:
+    '''
+        Devuelve el tipo de habitación en la que se encuentra el personaje
+    '''
+    layout = LAYOUT_2
+    x,y = current_pos
+    cell = layout[y][x]
+    
+
 # ----- Inicio y controlador de juego ------
 def start_menu():
     """
@@ -260,7 +280,7 @@ def knight():
     '''
     global stats
     stats = [50, 600, 75]
-    
+
 def assassin():
     '''
         Se crean los stats para el personaje asesino
@@ -268,7 +288,7 @@ def assassin():
     '''
     global stats
     stats = [50, 500, 110]
-    
+
 def boss():
     pass
 
@@ -312,123 +332,6 @@ def create_character_class(character):
     classes = [knight, assassin]
     classes[character]()
 
-# ------ Combate -----
-def who_attacks_first():
-    '''
-        Determina quien ataca primero
-    '''
-    global stats
-    delayed_print('¡Un enemigo salvaje ha aparecido! Probemos tu suerte...')
-    dice_roll_simulation([random.randint(1,20), random.randint(1,20)])
-    enemy_dice, dice = dice_roll()
-
-    if dice > enemy_dice:
-        delayed_print('¡Eres más rápido que tu enemigo! Atacas primero.')
-        return 0
-    delayed_print('El enemigo es más rápido, te ataca primero.')
-    return 1
-
-def fight(enemy_type):
-    '''
-        Ejecuta la pelea
-    '''
-    global stats
-    # ---- Creacion del enemigo para la pelea ------
-    enemy_stats = create_enemy(enemy_type)
-<<<<<<< HEAD
-    delayed_print('¡Un enemigo salvaje ha aparecido! que vas a hacer?')
-    turn_functions = [player_turn, enemy_turn]
-    turn_choice = random.choice([0,1])
-    if turn_choice == 0:
-        delayed_print('Estás listo para atacar!')
-    else:
-        delayed_print('El enemigo es más rápido que tú, te ataca primero!')
-    while enemy_life > 0 and life > 0:
-        turn_functions[turn_choice](enemy_stats)
-        turn_choice = 1 - turn_choice
-
-def player_turn(enemy_stats):
-    '''
-        Turno del jugador
-    '''
-    global stats
-    enemy_life, enemy_attk, enemy_luck, enemy_crit  = enemy_stats
-    life, attk, luck, crit = stats
-    delayed_print('Atacaste al enemigo')
-    enemy_dice, dice = dice_roll(enemy_luck, luck)
-    if dice > enemy_dice:
-        if dice - enemy_dice > 7:
-            delayed_print('¡Golpe crítico!')
-            delayed_print('Tu brazo retumba con la fuerza del golpe.')
-            enemy_life  -= crit
-        else:
-            delayed_print('Tu espada corta al enemigo')
-            enemy_life -= attk
-    else:
-        delayed_print('Fallaste el golpe')
-        delayed_print('Tu espada corta el aire con un silbido.')
-    enemy_stats = [enemy_life, enemy_attk, enemy_luck, enemy_crit]
-    return enemy_stats
-
-def enemy_turn(enemy_stats):
-    global stats
-    enemy_life, enemy_attk, enemy_luck, enemy_crit = enemy_stats
-    life, attk, luck, crit = stats
-    enemy_dice, dice = dice_roll(enemy_luck, luck)
-    delayed_print('El enemigo ataca, ¡cuidado!')
-    if dice >= enemy_dice:
-        delayed_print('El enemigo falla el ataque.')
-    else:
-        if enemy_dice - dice > 7:
-            delayed_print('¡Golpe crítico!')
-            delayed_print('El golpe deja una herida profunda')
-            life  -= enemy_crit
-        else:
-            delayed_print('El enemigo te golpea')
-            life -= enemy_attk
-    stats = [life, attk, luck, crit]
-
-
-def dice_roll(enemy_luck, luck):
-=======
-    turn_choice = who_attacks_first()
-    turn_functions = [player_turn, enemy_turn]
-
-    while enemy_stats[1] > 0 and stats[1] > 0:
-        turn_functions[turn_choice]()
-        turn_choice = 1 - turn_choice
-
-def player_turn():
-    iterate_options(['atacar', 'irse'])
-    action = input_with_validation('Elije rapido!', 'No, no, eso no se puede hacer.', range(1, 3))
-    if action == 1:
-        delayed_print('Atacaste al enemigo')
-        enemy_dice, dice = dice_roll(enemy_luck, luck)
-        if dice > enemy_dice:
-            if dice - enemy_dice > 7:
-                delayed_print('¡Golpe crítico!')
-                delayed_print('Tu brazo retumba con la fuerza del golpe.')
-                enemy_life
-def enemy_turn():
-    pass
-def dice_roll():
->>>>>>> 6337c2f77a0469734306f94dfb4bb2ce2b741adf
-    '''
-        Funcion que simula el lanzamiento de dados
-    '''
-    enemy_dice = random.randint(1,20)
-    dice = random.randint(1,20)
-    return enemy_dice, dice
-
-def dice_roll_simulation(delay=0.1):
-    """
-        Simula una ruleta visual con las tiradas de dados.
-    """
-    for i in range(random.randint(10,18)):
-        print(f"\r{random.randint(1,20)}", end="")
-        time.sleep(delay)
-    print()
-
 def create_enemy(enemy_type):
     '''
         Crea a los enemigos segun el tipo requerido por la pelea
@@ -439,12 +342,238 @@ def create_enemy(enemy_type):
 
     return enemy()
 
+# ------ Combate -----
+def fight(enemy_type):
+    '''
+        Ejecuta la pelea
+    '''
+    global stats
+    green = '\033[92m'
+    red = '\033[91m'
+    enemy_stats = create_enemy(enemy_type)
+    turn_choice = who_attacks_first()
+    turn_functions = [player_turn, enemy_turn]
+    while enemy_stats[1] > 0 and stats[1] > 0:
+        enemy_stats = turn_functions[turn_choice](enemy_stats)
+        turn_choice = 1 - turn_choice
+        os.system('cls')
+        delayed_print(f'El enemigo tiene {enemy_stats[1]} de vida.', color=red)
+        delayed_print(f'Tienes {stats[1]} de vida.', color=green)
+
+    if stats[1] <= 0 and enemy_type == 'base':
+        death_menu('Asesinado a manos de un simple esbirro... que verguenza.')
+        time.sleep(1)
+
+
+    delayed_print('¡Has vencido al enemigo!', color=green)
+    delayed_print('Continuemos...')
+
+    time.sleep(1)
+
+def who_attacks_first():
+    '''
+        Determina quien ataca primero
+    '''
+    global stats
+    delayed_print('¡Un enemigo salvaje ha aparecido! Probemos tu suerte...')
+    enemy_dice = 0
+    dice = 0
+    green = '\033[92m'
+    red = '\033[91m'
+    while enemy_dice == dice:
+        enemy_dice, dice = dice_roll()
+        if enemy_dice == dice:
+            delayed_print('Uno debe ser el primero, volvamos a intentarlo.')
+
+
+    if dice > enemy_dice:
+        delayed_print('¡Eres más rápido que tu enemigo! Atacas primero.',color=green)
+        return 0
+    delayed_print('El enemigo es más rápido, te ataca primero.', color=red )
+    return 1
+
+def death_menu(text):
+    '''
+        Menu de muerte
+    '''
+    red = '\033[91m'
+    delayed_print(text, color=red)
+    options = ['Volver a intentarlo', 'Salir']
+    selection = menu(options, '¿Qué deseas hacer?', 'Has muerto...')
+    if selection == 1:
+        game()
+    os.system('cls')
+    delayed_print('Hasta la próxima...')
+
+def player_attack(enemy_stats):
+    '''
+        Ataque del jugador
+    '''
+    global stats
+    color = '\033[92m'
+    delayed_print('Atacas al enemigo', color=color)
+    enemy_dice, dice = dice_roll()
+    attk, life, crit = stats
+    enemy_attk, enemy_life,  enemy_crit = enemy_stats
+    if dice > enemy_dice:
+        if dice - enemy_dice >= 7:
+            delayed_print('¡Golpe crítico!', color=color)
+            delayed_print('Tu brazo retumba con la fuerza del golpe.', color=color)
+            enemy_life -= crit
+        else:
+            delayed_print('¡Golpeas al enemigo!', color=color)
+            enemy_life -= attk
+    else:
+        delayed_print('¡Fallaste el golpe!', color=color)
+    if enemy_life <= 0:
+        enemy_life = 0
+    return [enemy_attk, enemy_life,  enemy_crit]
+
+def player_turn(enemy_stats):
+    '''
+        Turno del jugador
+    '''
+    global stats
+    enemy_attk, enemy_life,  enemy_crit = enemy_stats
+    attk, life, crit = stats
+    color = '\033[92m'
+    options = ['Atacar', 'Objeto']
+    delayed_print('Es tu turno.', color=color)
+    iterate_options(options, color=color)
+    choice = input_with_validation('¿Qué deseas hacer? ', 'No puedes huir de tu destino.',
+                                    range(1,len(options) + 1))
+    if choice == 1:
+        enemy_stats = player_attack(enemy_stats)
+    elif choice == 2:
+        items_menu()
+    return enemy_stats
+
+def items_menu():
+    '''
+        menu de items
+    '''
+    global items
+    iterate_options(items)
+    item = input_with_validation('¿Qué objeto deseas usar? ', 'No puedes usar eso.',
+                                range(1,len(items) + 1))
+    item = items[item - 1]
+    items.remove(item)
+    use_item(item)
+
+def enemy_turn(enemy_stats):
+    '''
+        Turno del enemigo
+    '''
+    global stats
+    enemy_dice, dice = dice_roll()
+    enemy_attk, enemy_life, enemy_crit = enemy_stats
+    attk,life, crit = stats
+    color = '\033[91m'
+
+    delayed_print('El enemigo alza su espada.', color=color)
+    if enemy_dice > dice:
+        if enemy_dice - dice >= 7:
+            delayed_print('El enemigo te ha golpeado con un golpe crítico.',color=color)
+            life -= enemy_crit
+        else:
+            delayed_print('El enemigo te ha golpeado.',color=color)
+            life -= enemy_attk
+    else:
+        delayed_print('El enemigo falla el golpe.', color=color)
+    stats = [attk, life, crit]
+    if life <= 0:
+        life = 0
+    return enemy_stats
+
+# ------ Items -----
+def use_item(item):
+    '''
+        Usa el item seleccionado
+    '''
+    global stats
+    global items
+
+    all_items = ['Poción de vida', 'Poción de fuerza', 'Poción de crítico']
+    item_functions = [potion_of_life, potion_of_strength, potion_of_crit]
+    item_index = all_items.index(item)
+    item_functions[item_index]()
+
+def potion_of_life():
+    '''
+        Poción de vida
+    '''
+    global stats
+    stats[1] += 100
+    delayed_print('Has usado una poción de vida, recuperas 100 puntos de vida.')
+
+def potion_of_strength():
+    '''
+        Poción de fuerza
+    '''
+    global stats
+    stats[0] += 10
+    delayed_print('Has usado una poción de fuerza, aumentas tu ataque en 10 puntos.')
+
+def potion_of_crit():
+    '''
+        Poción de critico
+    '''
+    global stats
+    stats[2] += 10
+    delayed_print('Has usado una poción de crítico, aumentas tu daño de golpe crítico en 10 puntos.')
+
+# ------ Dados ------
+def dice_roll():
+    '''
+        Funcion que simula el lanzamiento de dados
+    '''
+    green = '\033[92m'
+    red = '\033[91m'
+    delayed_print('Lanzando los dados...', color=green)
+    dice = dice_roll_simulation(color=green)
+    delayed_print('El enemigo lanza los dados...', color=red)
+    enemy_dice = dice_roll_simulation(color=red)
+    return enemy_dice, dice
+
+def dice_roll_simulation(delay=0.1, color = None):
+    """
+        Simula una ruleta visual con las tiradas de dados.
+    """
+    spin_amount = random.randint(10, 20)
+    end_color = '\033[0m'
+    for _ in range(spin_amount):
+        dice = random.randint(1, 20)
+        if color:
+            print(f"{color}{dice}{end_color} ", end="\r")
+        else:
+            print(f"{dice} ", end="\r")
+        time.sleep(delay)
+    print()
+    return dice
+
+# ------ Main ------
 def main():
     """
-    main qcyo
+    Ejecuta el programa
     """
     start_menu()
 
-#game()
-fight('base')
+def get_random_potion() -> str:
+    """
+    Selecciona una poción aleatoria de la lista de pociones.
+    """
+    life_potion = ['Poción de vida'] * 9
+    attack_potion = ['Poción de fuerza'] * 3
+    critical_potion = ['Poción de crítico'] * 3
+    potions = life_potion + attack_potion + critical_potion
 
+    index = random.randint(0, len(potions) - 1)
+    return potions[index]
+
+
+    
+
+#game()
+
+#fight('base')
+move_input(['arriba', 'derecha'], [2, 2])
