@@ -49,43 +49,48 @@ stats = [50, 600, 75]
 items = ['Poción de vida', 'Poción de vida']
 is_boss_unlocked = False
 
+LAYOUT_1 = [
+    ['.RM','.','X','.P','.B'],
+    ['.P','.','.P','.','.'],
+    ['X','.P','X','.P','.RM'],
+    ['.P','.','.P','.','.'],
+    ['+S','.P','X','.P','.RM'],
+]
+LAYOUT_2 = [
+    ['.RM','.','X','.P','.B'],
+    ['.P','.','.P','.','.'],
+    ['X','.P','+S','.P','.RM'],
+    ['.P','.','.P','.','.'],
+    ['.RM','.P','X','.P','X'],
+]
+LAYOUT_3 = [
+    ['.RM','.','X','.P','.B'],
+    ['.P','.','.P','.','.'],
+    ['X','.P','X','.P','.RM'],
+    ['.P','.','.P','.','.'],
+    ['+S','.P','X','.P','.RM'],
+]
+
 def generate_random_map() -> list:
     '''
         Selecciona un diseño de mapa aleatorio y lo prepara para su representación.
     '''
-    layout_1 = [
-        ['.RM','.','X','.P','.B'],
-        ['.P','.','.P','.','.'],
-        ['X','.P','X','.P','.RM'],
-        ['.P','.','.P','.','.'],
-        ['+S','.P','X','.P','.RM'],
-    ]
-    layout_2 = [
-        ['.RM','.','X','.P','.B'],
-        ['.P','.','.P','.','.'],
-        ['X','.P','+S','.P','.RM'],
-        ['.P','.','.P','.','.'],
-        ['.RM','.P','X','.P','X'],
-    ]
-    layout_3 = [
-        ['.RM','.','X','.P','.B'],
-        ['.P','.','.P','.','.'],
-        ['X','.P','X','.P','.RM'],
-        ['.P','.','.P','.','.'],
-        ['+S','.P','X','.P','.RM'],
-    ]
 
-    layouts = [ layout_1, layout_2, layout_3 ]
+    layouts = [ LAYOUT_1, LAYOUT_2, LAYOUT_3 ]
     selected_layout = layouts[random.randint(0, len(layouts) - 1)]
 
-    possible_rooms = ['.RE', '.RP', '.RC', '.REC', '.RPE', '.REE', '.RPC']
+    possible_rooms = ['.RE', '.RE', '.RE', '.RE', '.RE',
+                      '.RP', '.RP', 
+                      '.RC', '.RC', 
+                      '.REC', '.REC', 
+                      '.RPE', '.REE', '.REE', 
+                      '.RPC'
+                    ]
 
     for y in range(len(selected_layout)):
         for x in range(len(selected_layout[y])):
             if selected_layout[y][x] == 'X':
-                selected_layout[y][x] = random.choices(possible_rooms,
-                                              weights=[0.5, 0.1, 0.1, 0.1, 0.05, 0.1, 0.05],
-                                              k=1)[0]
+                selected_layout[y][x] = possible_rooms[random.randint(0, len(possible_rooms) - 1)]
     return selected_layout
 
 layout = generate_random_map()
@@ -324,7 +329,6 @@ def move_input(options: list, current_pos: list) -> list:
             items_menu()
     new_pos = move_character(choice-1, current_pos, options)
     return new_pos
-
 
 def move_character(index: int, current_pos: list, options: list) -> list:
     '''
