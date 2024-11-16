@@ -15,33 +15,33 @@ B -> Boss Final
 
 import random
 
-ANCHO_HABITACION = 9
-ALTO_HABITACION = 5
-DIMENSION_PLANO = 5
+ROOM_WIDTH = 9
+ROOM_HEIGHT = 5
+MAP_DIMENSION = 5
 
-mapa = []
-for _ in range(ALTO_HABITACION * DIMENSION_PLANO):
-    mapa.append([' '] * (ANCHO_HABITACION * DIMENSION_PLANO))
+map_grid = []
+for _ in range(ROOM_HEIGHT * MAP_DIMENSION):
+    map_grid.append([' '] * (ROOM_WIDTH * MAP_DIMENSION))
 
-def generar_plano_aleatorio() -> list:
+def generate_random_map() -> list:
     '''
-        Selecciona un plano aleatorio y lo prepara para su representación.
+        Selecciona un diseño de mapa aleatorio y lo prepara para su representación.
     '''
-    plano_1 = [
+    layout_1 = [
         ['.RM','.','X','.P','.B'],
         ['.P','.','.P','.','.'],
         ['X','.P','X','.P','.RM'],
         ['.P','.','.P','.','.'],
         ['+S','.P','X','.P','.RM'],
     ]
-    plano_2 = [
+    layout_2 = [
         ['.RM','.','X','.P','.B'],
         ['.P','.','.P','.','.'],
         ['X','.P','+S','.P','.RM'],
         ['.P','.','.P','.','X'],
         ['.RM','.P','X','.P','.P'],
     ]
-    plano_3 = [
+    layout_3 = [
         ['.RM','.','X','.P','.B'],
         ['.P','.','.P','.','.'],
         ['X','.P','X','.P','.RM'],
@@ -49,90 +49,89 @@ def generar_plano_aleatorio() -> list:
         ['+S','.P','X','.P','.RM'],
     ]
 
-    planos = [ plano_1, plano_2, plano_3 ]
-    plano_seleccionado = random.choice(planos)
+    layouts = [ layout_1, layout_2, layout_3 ]
+    selected_layout = random.choice(layouts)
 
-    posibles_habitaciones = ['.RE', '.RP', '.RC', '.REC', '.RPE', '.REE', '.RPC']
+    possible_rooms = ['.RE', '.RP', '.RC', '.REC', '.RPE', '.REE', '.RPC']
 
-    for y in range(len(plano_seleccionado)):
-        for x in range(len(plano_seleccionado[y])):
-            if plano_seleccionado[y][x] == 'X':
-                plano_seleccionado[y][x] = random.choices(posibles_habitaciones,
+    for y in range(len(selected_layout)):
+        for x in range(len(selected_layout[y])):
+            if selected_layout[y][x] == 'X':
+                selected_layout[y][x] = random.choices(possible_rooms,
                                               weights=[0.5, 0.1, 0.1, 0.1, 0.05, 0.1, 0.05],
                                               k=1)[0]
-    return plano_seleccionado
+    return selected_layout
 
-plano = generar_plano_aleatorio()
+layout = generate_random_map()
 
-print('Plano generado:', plano)
+print('Generated layout:', layout)
 
-def generar_mapa():
+def generate_map():
     '''
         Genera el mapa completo.
     '''
-    for y in range(len(plano)):
-        for x in range(len(plano[y])):
-            crear_habitacion(plano[y][x], x, y)
+    for y in range(len(layout)):
+        for x in range(len(layout[y])):
+            create_room(layout[y][x], x, y)
 
-def crear_habitacion(tipo_casilla: str, plano_x: int, plano_y: int) -> list:
+def create_room(cell_type: str, layout_x: int, layout_y: int) -> list:
     '''
         Crea una habitación dentro del mapa.
     '''
-    mapa_x = plano_x * ANCHO_HABITACION
-    mapa_y = plano_y * ALTO_HABITACION
+    map_x = layout_x * ROOM_WIDTH
+    map_y = layout_y * ROOM_HEIGHT
 
-    pared_horizontal = ' '
-    pared_vertical = ' '
-    borde = ' '
+    horizontal_wall = ' '
+    vertical_wall = ' '
+    border = ' '
 
-    if tipo_casilla.startswith('.'):
-        pared_horizontal = ' '
-        pared_vertical = ' '
-        borde = ' '
-    elif tipo_casilla.count('S'):
-        pared_horizontal = '-'
-        pared_vertical = '|'
-        borde = '@'
-    elif tipo_casilla.count('B'):
-        pared_horizontal = '%'
-        pared_vertical = '%'
-        borde = '6'
-    elif tipo_casilla.count('RM'):
-        pared_horizontal = '-'
-        pared_vertical = '|'
-        borde = 'M'
-    elif tipo_casilla.count('R'):
-        pared_horizontal = '-'
-        pared_vertical = '|'
-        borde = '°'
+    if cell_type.startswith('.'):
+        horizontal_wall = ' '
+        vertical_wall = ' '
+        border = ' '
+    elif cell_type.count('S'):
+        horizontal_wall = '-'
+        vertical_wall = '|'
+        border = '@'
+    elif cell_type.count('B'):
+        horizontal_wall = '%'
+        vertical_wall = '%'
+        border = '6'
+    elif cell_type.count('RM'):
+        horizontal_wall = '-'
+        vertical_wall = '|'
+        border = 'M'
+    elif cell_type.count('R'):
+        horizontal_wall = '-'
+        vertical_wall = '|'
+        border = '°'
 
-    if tipo_casilla.startswith('+'):
-        mapa[mapa_y + 2][mapa_x + 4] = '8'
+    if cell_type.startswith('+'):
+        map_grid[map_y + 2][map_x + 4] = '8'
     else:
-        mapa[mapa_y + 2][mapa_x + 4] = ' '
+        map_grid[map_y + 2][map_x + 4] = ' '
 
+    map_grid[map_y][map_x] = border
+    map_grid[map_y][(map_x + ROOM_WIDTH) - 1] = border
+    map_grid[(map_y + ROOM_HEIGHT) - 1][map_x] = border
+    map_grid[(map_y + ROOM_HEIGHT) - 1][(map_x + ROOM_WIDTH) - 1] = border
 
-    mapa[mapa_y][mapa_x] = borde
-    mapa[mapa_y][(mapa_x + ANCHO_HABITACION) - 1] = borde
-    mapa[(mapa_y + ALTO_HABITACION) - 1][mapa_x] = borde
-    mapa[(mapa_y + ALTO_HABITACION) - 1][(mapa_x + ANCHO_HABITACION) - 1] = borde
+    for x in range(map_x + 1, map_x + ROOM_WIDTH - 1):
+        map_grid[map_y][x] = horizontal_wall
+        map_grid[map_y + (ROOM_HEIGHT - 1)][x] = horizontal_wall
 
-    for x in range(mapa_x + 1, mapa_x + ANCHO_HABITACION - 1):
-        mapa[mapa_y][x] = pared_horizontal
-        mapa[mapa_y + (ALTO_HABITACION - 1)][x] = pared_horizontal
+    for y in range(map_y + 1, map_y + ROOM_HEIGHT - 1):
+        map_grid[y][map_x] = vertical_wall
+        map_grid[y][(map_x + ROOM_WIDTH) - 1] = vertical_wall
 
-    for y in range(mapa_y + 1, mapa_y + ALTO_HABITACION - 1):
-        mapa[y][mapa_x] = pared_vertical
-        mapa[y][(mapa_x + ANCHO_HABITACION) - 1] = pared_vertical
-
-def mostrar_mapa() -> None:
+def display_map() -> None:
     '''
         Muestra el mapa en la pantalla.
     '''
-    generar_mapa()
-    for fila in mapa:
-        for casilla in fila:
-            print(casilla, end='')
+    generate_map()
+    for row in map_grid:
+        for cell in row:
+            print(cell, end='')
         print()
 
-mostrar_mapa()
+display_map()
