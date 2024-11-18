@@ -857,7 +857,7 @@ def death_menu(text):
         game()
     os.system('cls')
     delayed_print('Hasta la próxima...')
-    exit(0)
+    quit(0)
 
 def player_attack(enemy_stats):
     '''
