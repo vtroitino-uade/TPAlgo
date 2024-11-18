@@ -33,15 +33,17 @@ import random
 import os
 import time
 
-# -------- Mapa y posiciones --------------
-ROOM_WIDTH = 9
-ROOM_HEIGHT = 5
-MAP_DIMENSION = 5
+# -------- Variables globales --------------
 
-map_grid = []
-stats = [50, 600, 75] #debug
-items = ['Poción de vida', 'Poción de vida'] #debug
+stats = [] 
+
+items = ['Poción de vida'] 
+
 boss_unlocked = False
+
+key_item = [1,2,3]
+
+END = False
 
 riddles = [
     "Soy ligero como una pluma, pero incluso la persona más fuerte no puede sostenerme por mucho tiempo. ¿Qué soy?",
@@ -69,6 +71,14 @@ riddles_options = [
     [["Un jarrón", "Una botella", "Una camisa", "Un reloj"], 1]  # Respuesta correcta: B
 ]
 
+# -------- Mapa y posiciones --------------
+ROOM_WIDTH = 9
+ROOM_HEIGHT = 5
+MAP_DIMENSION = 5
+
+map_grid = []
+
+
 
 
 LAYOUT_1 = [
@@ -92,7 +102,6 @@ LAYOUT_3 = [
     ['.P','.','.P','.','.'],
     ['+S','.P','X','.P','.RM'],
 ]
-
 
 
 def generate_random_map() -> list:
@@ -302,6 +311,11 @@ def check_available_ways(current_pos: list) -> list:
     '''
         Revisa las opciones de movimiento disponibles
     '''
+    global key_item
+    if len(key_item) == 3:
+        global boss_unlocked
+        boss_unlocked = True
+
     actual_cell = current_pos[0]
     actual_row = current_pos[1]
 
@@ -353,8 +367,8 @@ def move_input(options: list, current_pos: list) -> list:
     options.append('Abrir inventario')
     while choice not in range(1, len(options)):
         iterate_options(options)
-        choice= input_with_validation('¿Qué vas a hacer? ', 'Ah, buscando burlar el sendero, ¿crees ' +
-                                  'que el destino se distrae tan fácilmente?', 
+        choice = input_with_validation('¿Qué vas a hacer? ', 'Ah, buscando burlar el sendero,' +
+                                  ' ¿crees que el destino se distrae tan fácilmente?', 
                                   range(1, len(options)+1))
         if choice == len(options):
             items_menu()
@@ -367,7 +381,7 @@ def move_character(index: int, current_pos: list, options: list) -> list:
     '''
     x_change = 0
     y_change = 0
-
+    
     if options[index] == 'arriba':
         y_change = -2
     elif options[index] == 'abajo':
@@ -376,10 +390,19 @@ def move_character(index: int, current_pos: list, options: list) -> list:
         x_change = -2
     elif options[index] == 'derecha':
         x_change = 2
-
+    
     x, y = current_pos[0], current_pos[1]
     x += x_change
     y += y_change
+    
+    if 'B' in layout[y][x] and boss_unlocked == False:
+        delayed_print('La puerta está cerrada, no puedes pasar. Una ventisca corre por detras de' +
+                      ' la puerta, esa es la salida.')
+        delayed_print('Una forma circular en el centro de la puerta parece activar un mecanismo.')
+        if len(key_item) > 0:
+            delayed_print('Parece que ese pedazo de medallón que encontraste podría ser útil aquí.')
+
+        return current_pos
 
     current_pos = [x, y]
 
@@ -410,12 +433,17 @@ def check_room_type(current_pos: list) -> str:
     '''
     x, y = current_pos
     cell = layout[y][x]
-    possible_rooms = ['RE', 'RP', 'RM', 'RC', 'REC', 'RPE', 'REE', 'RPC']
+    possible_rooms = ['RE', 'RP', 'RM', 'RC', 'REC', 'RPE', 'REE', 'RPC', 'B']
     possible_rooms_functions = [enemy_room, puzzle_room, midboss_room, chest_room, chest_enemy_room,
-                                puzzle_enemy_room, double_enemy_room, puzzle_chest_room]
+                                puzzle_enemy_room, double_enemy_room, puzzle_chest_room, boss_room]
     for room in possible_rooms:
         if '+' + room == cell and '-' not in cell:
             fake_dictionary(room, possible_rooms, possible_rooms_functions)()
+def boss_room():
+    '''
+        Crea una habitación de jefe
+    '''
+    fight('final')
 
 def enemy_room():
     '''
@@ -430,6 +458,9 @@ def midboss_room():
     fight('boss')
 
 def puzzle_room():
+    '''
+        Crea una habitación de puzzle
+    '''
     create_puzzle()
 
 def create_puzzle():
@@ -472,6 +503,9 @@ def create_puzzle():
         death_menu('Has fallado el puzzle.')
 
 def chest_room():
+    '''
+        Crea una habitación con un cofre
+    '''
     global items
     delayed_print('¡Encuentras un cofre! Veamos que hay dentro...')
     possible_items = ['Poción de vida'] * 5 + ['Poción de fuerza'] * 2 + ['Poción de crítico'] * 2
@@ -490,7 +524,7 @@ def puzzle_enemy_room():
         Crea una habitación con un puzzle y un enemigo
     '''
     create_puzzle()
-    delayed_print('Un enemigo se escabulle por las puertas recién abiertas')	
+    delayed_print('Un enemigo se escabulle por las puertas recién abiertas', color='\033[91m')
     fight('base')
 
 def puzzle_chest_room():
@@ -506,7 +540,7 @@ def double_enemy_room():
     fight('base')
     delayed_print('Un segundo enemigo aparece, parece que no estás solo...')
     fight('base')
-
+glob
 def mark_room_as_visited(pos: list) -> None:
     '''
         Marca una habitación como visitada
@@ -539,12 +573,25 @@ def game():
     #story(0)
     create_character_input()
     os.system('cls')
-    while True:
+    while END is False:
         display_map()
         print()
         pos = character_movement()
         check_room_type(pos)
         mark_room_as_visited(pos)
+    end_credits()
+
+def end_credits():
+    '''
+        Muestra los créditos finales
+    '''
+    os.system('cls')
+    delayed_print('Gracias por jugar DnD Rogue si fuera bueno.')
+    delayed_print('Desarrollado por: ')
+    delayed_print('Aguirre, Simón.')
+    delayed_print('Troitiño, Valentín.')
+    delayed_print('Este proyecto es ficticio y fue creado con fines educativos. Cualquier similitud con nombres, personajes o eventos reales es pura coincidencia.')
+    input('Presiona enter para salir...')
 
 
 # ------- Clases y creacion de personaje y enemigos ----
@@ -565,10 +612,19 @@ def assassin():
     stats = [50, 500, 110]
 
 def boss():
-    pass
+    '''
+        Crea al jefe de nivel
+        stats segun el index = ['base_attack', 'base_hp', 'crit_hit']'''
+    enemy_stats = [50, 250, 70]
+    return enemy_stats
 
 def final_boss():
-    pass
+    '''
+        Crea al jefe final
+        stats segun el index = ['base_attack', 'base_hp', 'crit_hit']
+    '''
+    enemy_stats = [60, 350, 90]
+    return enemy_stats
 
 def base_enemy():
     '''
@@ -598,6 +654,7 @@ def create_character_input():
         confirmation = input_with_validation('¿Estás seguro?\n1. Si\n2. No\n', 'No evadas la pregunta',
                                              range(1,3))
     delayed_print('Así que eso eres... esperemos que tus pecados hoy te ayuden.')
+    time.sleep(1)
     create_character_class(character_class - 1)
 
 def create_character_class(character):
@@ -624,10 +681,10 @@ def create_enemy_phrase(enemy_type) -> str:
 
     enemy_types = ['base', 'boss', 'final']
     enemy_types_functions = [create_base_enemy_name, create_boss_enemy_name, create_final_boss_name]
-    
+
     enemy_name, enemy_phrase = enemy_types_functions[enemy_types.index(enemy_type)]()
-    
-    
+
+
     return enemy_name, enemy_phrase
 
 def create_base_enemy_name():
@@ -698,30 +755,22 @@ def create_final_boss_name():
     return final_boss_name, "El Viajero sin nombre te observa con ojos cansados, su arma lista para el combate."
 
 
-    '''
-        Genera un nombre aleatorio para un enemigo
-    '''
-
-    enemy_types = ['base', 'boss', 'final']
-    enemy_types_functions = [create_base_enemy_name, create_boss_enemy_name, create_final_boss_name]
-    
-    enemy_name, enemy_phrase = enemy_types_functions[enemy_types.index(enemy_type)]()
-    
-    return enemy_name, enemy_phrase
 # ------ Combate -----
 def fight(enemy_type):
     '''
         Ejecuta la pelea
     '''
     global stats
+    global key_item
+    global END
     green = '\033[92m'
     red = '\033[91m'
+    enemy_name, spawn_phrase = create_enemy_phrase(enemy_type)
+    delayed_print(spawn_phrase, color=red)
     turn_choice = who_attacks_first()
     turn_functions = [player_turn, enemy_turn]
-    enemy_name, spawn_phrase = create_enemy_phrase(enemy_type)
     enemy_stats = create_enemy(enemy_type)
 
-    delayed_print(spawn_phrase, color=red)
     while enemy_stats[1] > 0 and stats[1] > 0:
         enemy_stats = turn_functions[turn_choice](enemy_stats)
         turn_choice = 1 - turn_choice
@@ -729,15 +778,31 @@ def fight(enemy_type):
         delayed_print(f'El enemigo tiene {enemy_stats[1]} de vida.', color=red)
         delayed_print(f'Tienes {stats[1]} de vida.', color=green)
 
-    if stats[1] <= 0 and enemy_type == 'base':
+    if stats[1] <= 0:
         death_menu(death_phrase(enemy_type))
         time.sleep(1)
 
-
+    if enemy_type == 'boss':
+        key_item.append('parte del medallón')
+        delayed_print('Revisas el cadaver de tu enemigo. Era muy fuerte, quizá encuentras' +
+                      ' algo importante...')
+        delayed_print('Encuentras un pedazo de medallón, parece ser una parte de tres.')
+        delayed_print(f'Tienes {len(key_item)} partes del medallón.')
+    elif enemy_type == 'final':
+        END = True
+        final_boss_phrase()
+        return
     delayed_print('¡Has vencido al enemigo!', color=green)
     delayed_print('Continuemos...')
 
     time.sleep(1)
+
+def final_boss_phrase():
+    delayed_print('El Viajero sin nombre cae al suelo, su arma resbalando de sus dedos.')
+    delayed_print('Sombras lo envuelven, el alivio cruza su rostro.')
+    delayed_print('Empiezas a correr hacia la salida que se abre, pero algo te detiene.')
+    delayed_print('Esas mismas sombras se extienden hacia ti, envolviéndote en un abrazo frío.')
+    delayed_print('El viajero no mentía.')
 
 def death_phrase(enemy_type):
     '''
@@ -755,7 +820,7 @@ def who_attacks_first():
         Determina quien ataca primero
     '''
     global stats
-    delayed_print('¡Un enemigo salvaje ha aparecido! Probemos tu suerte...')
+    delayed_print('Probemos tu suerte...')
     enemy_dice = 0
     dice = 0
     green = '\033[92m'
@@ -834,14 +899,25 @@ def items_menu():
         menu de items
     '''
     global items
-    items.append('Salir')
-    iterate_options(items)
+    items_options = list_copy(items)
+
+    items_options.append('Salir')
+    iterate_options(items_options)
     item = input_with_validation('¿Qué objeto deseas usar? ', 'No puedes usar eso.',
-                                range(1,len(items) + 1))
+                                range(1,len(items_options) + 1))
     item = items[item - 1]
     items.remove(item)
     if item != 'Salir':
         use_item(item)
+
+def list_copy(array):
+    '''
+        Copia una lista
+    '''
+    array_copy = []
+    for element in array:
+        array_copy.append(element)
+    return array_copy
 
 def enemy_turn(enemy_stats):
     '''
@@ -863,6 +939,7 @@ def enemy_turn(enemy_stats):
             life -= enemy_attk
     else:
         delayed_print('El enemigo falla el golpe.', color=color)
+        time.sleep(0.5)
     stats = [attk, life, crit]
     if life <= 0:
         life = 0
