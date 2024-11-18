@@ -380,6 +380,8 @@ def move_input(options: list, current_pos: list) -> list:
                                   range(1, len(options)+1))
         if choice == len(options):
             items_menu()
+            time.sleep(0.5)
+            return current_pos
     new_pos = move_character(choice-1, current_pos, options)
     return new_pos
 
@@ -906,6 +908,7 @@ def items_menu():
     '''
         menu de items
     '''
+    os.system('cls')
     global items
     items_options = list_copy(items)
 
@@ -913,10 +916,11 @@ def items_menu():
     iterate_options(items_options)
     item = input_with_validation('¿Qué objeto deseas usar? ', 'No puedes usar eso.',
                                 range(1,len(items_options) + 1))
-    item = items[item - 1]
-    items.remove(item)
-    if item != 'Salir':
+    item_name = items_options[item - 1]
+    if item_name != 'Salir':
+        item = items[item - 1]
         use_item(item)
+        items.remove(item)
 
 def list_copy(array):
     '''
