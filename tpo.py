@@ -238,10 +238,14 @@ def input_with_validation(input_text: str, error_text: str, input_range: range) 
     '''
         Valida el input segun los parametros
     '''
+    is_digit = True
     while True:
         var = input(input_text)
         time.sleep(0.1)
-        if var.isdigit():
+        for character in var:
+            if character not in ['0','1','2','3','4','5','6','7','8','9']:
+                is_digit = False
+        if is_digit:
             var = int(var)
             if input_range and var in input_range:
                 return var
@@ -385,7 +389,7 @@ def move_character(index: int, current_pos: list, options: list) -> list:
     '''
     x_change = 0
     y_change = 0
-    
+
     if options[index] == 'arriba':
         y_change = -2
     elif options[index] == 'abajo':
@@ -394,11 +398,11 @@ def move_character(index: int, current_pos: list, options: list) -> list:
         x_change = -2
     elif options[index] == 'derecha':
         x_change = 2
-    
+
     x, y = current_pos[0], current_pos[1]
     x += x_change
     y += y_change
-    
+
     if 'B' in layout[y][x] and boss_unlocked == False:
         delayed_print('La puerta está cerrada, no puedes pasar. Una ventisca corre por detras de' +
                       ' la puerta, esa es la salida.')
@@ -544,7 +548,7 @@ def double_enemy_room():
     fight('base')
     delayed_print('Un segundo enemigo aparece, parece que no estás solo...')
     fight('base')
-glob
+
 def mark_room_as_visited(pos: list) -> None:
     '''
         Marca una habitación como visitada
