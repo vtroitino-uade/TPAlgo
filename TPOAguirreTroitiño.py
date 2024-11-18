@@ -30,7 +30,6 @@ UNDERLINE = '\033[4m' # subrayado
 '''
 
 import random
-import math
 import os
 import time
 
@@ -78,8 +77,6 @@ ROOM_HEIGHT = 5
 MAP_DIMENSION = 5
 
 map_grid = []
-
-
 
 
 LAYOUT_1 = [
