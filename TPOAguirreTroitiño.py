@@ -235,8 +235,8 @@ def input_with_validation(input_text: str, error_text: str, input_range: range) 
     '''
         Valida el input segun los parametros
     '''
-    is_digit = True
     while True:
+        is_digit = True
         var = input(input_text)
         time.sleep(0.1)
         for character in var:
