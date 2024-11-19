@@ -788,6 +788,7 @@ def fight(enemy_type):
     if stats[1] <= 0:
         death_menu(death_phrase(enemy_type))
         time.sleep(1)
+        return
 
     if enemy_type == 'boss':
         key_item.append('parte del medallón')
@@ -848,6 +849,7 @@ def death_menu(text):
     '''
         Menu de muerte
     '''
+    global END
     red = '\033[91m'
     delayed_print(text, color=red)
     options = ['Volver a intentarlo', 'Salir']
@@ -856,7 +858,7 @@ def death_menu(text):
         game()
     os.system('cls')
     delayed_print('Hasta la próxima...')
-    quit(0)
+    END = True
 
 def player_attack(enemy_stats):
     '''
