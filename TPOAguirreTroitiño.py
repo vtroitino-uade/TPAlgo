@@ -1039,12 +1039,4 @@ def dice_roll_simulation(delay=0.1, color = None):
     print()
     return dice
 
-# ------ Main ------
-def main():
-    '''
-    Ejecuta el programa
-    '''
-    start_menu()
 
-
-main()
