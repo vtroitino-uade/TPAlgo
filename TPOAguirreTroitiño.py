@@ -35,13 +35,13 @@ import time
 
 # -------- Variables globales --------------
 
-stats = [] 
+stats = []
 
-items = ['Poción de vida'] 
+items = ['Poción de vida']
 
 boss_unlocked = False
 
-key_item = [1,2,3]
+key_item = []
 
 END = False
 
@@ -888,12 +888,12 @@ def player_turn(enemy_stats):
     '''
     global stats
     choice = 0
-    salir = 'Salir'
+    objeto = 'Salir'
     enemy_attk, enemy_life,  enemy_crit = enemy_stats
     attk, life, crit = stats
     color = '\033[92m'
     options = ['Atacar', 'Objeto']
-    while choice != 1 and salir == 'Salir':
+    while choice != 1 and objeto == 'Salir':
         os.system('cls')
         delayed_print('Es tu turno.', color=color)
         iterate_options(options, color=color)
@@ -902,7 +902,7 @@ def player_turn(enemy_stats):
         if choice == 1:
             enemy_stats = player_attack(enemy_stats)
         elif choice == 2:
-           salir = items_menu()
+           objeto = items_menu()
     return enemy_stats
 
 def items_menu():
