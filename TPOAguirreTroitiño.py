@@ -242,7 +242,7 @@ def input_with_validation(input_text: str, error_text: str, input_range: range) 
         for character in var:
             if character not in ['0','1','2','3','4','5','6','7','8','9']:
                 is_digit = False
-        if is_digit:
+        if is_digit and len(var) > 0:
             var = int(var)
             if input_range and var in input_range:
                 return var
@@ -560,7 +560,7 @@ def start_menu():
     '''
         Menu de inicio
     '''
-    options = ['Jugar', 'Ver tutorial', 'Opciones', 'Salir']
+    options = ['Jugar', 'Salir']
     selection = menu(options, 'Seleccione una opción: ', 'Bievenido a DnD Rogue si fuera bueno')
     if selection == 1:
         game()
@@ -577,7 +577,7 @@ def game():
     print('Empecemos...')
     time.sleep(1)
 
-    #story(0)
+    story(0)
     create_character_input()
     os.system('cls')
     while END is False:
@@ -887,18 +887,22 @@ def player_turn(enemy_stats):
         Turno del jugador
     '''
     global stats
+    choice = 0
+    salir = 'Salir'
     enemy_attk, enemy_life,  enemy_crit = enemy_stats
     attk, life, crit = stats
     color = '\033[92m'
     options = ['Atacar', 'Objeto']
-    delayed_print('Es tu turno.', color=color)
-    iterate_options(options, color=color)
-    choice = input_with_validation('¿Qué deseas hacer? ', 'No puedes huir de tu destino.',
+    while choice != 1 and salir == 'Salir':
+        os.system('cls')
+        delayed_print('Es tu turno.', color=color)
+        iterate_options(options, color=color)
+        choice = input_with_validation('¿Qué deseas hacer? ', 'No puedes huir de tu destino.',
                                     range(1,len(options) + 1))
-    if choice == 1:
-        enemy_stats = player_attack(enemy_stats)
-    elif choice == 2:
-        items_menu()
+        if choice == 1:
+            enemy_stats = player_attack(enemy_stats)
+        elif choice == 2:
+           salir = items_menu()
     return enemy_stats
 
 def items_menu():
@@ -918,6 +922,7 @@ def items_menu():
         item = items[item - 1]
         use_item(item)
         items.remove(item)
+    return item_name
 
 def list_copy(array):
     '''
@@ -1039,8 +1044,5 @@ def main():
     '''
     start_menu()
 
-# input_with_validation('Ingrese:','int', [1, 4])
-game()
-#fight('base')
-# move_input(['arriba', 'derecha'], [2, 2])
-#create_puzzle()
+
+main()
