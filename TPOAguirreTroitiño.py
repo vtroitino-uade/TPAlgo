@@ -32,6 +32,7 @@ UNDERLINE = '\033[4m' # subrayado
 import random
 import os
 import time
+import sys
 
 # -------- Variables globales --------------
 
@@ -216,6 +217,7 @@ def delayed_print(text: str, delay_char=0.03, color=None) -> None:
             print(f'{color}{character}\033[0m', end='')
         else:
             print(f'{character}', end='')
+        sys.stdout.flush()
         time.sleep(delay_char)
     print()
 
@@ -781,9 +783,11 @@ def fight(enemy_type):
     while enemy_stats[1] > 0 and stats[1] > 0:
         enemy_stats = turn_functions[turn_choice](enemy_stats)
         turn_choice = 1 - turn_choice
+        time.sleep(0.5)
         os.system('cls')
         delayed_print(f'El enemigo tiene {enemy_stats[1]} de vida.', color=red)
         delayed_print(f'Tienes {stats[1]} de vida.', color=green)
+
 
     if stats[1] <= 0:
         death_menu(death_phrase(enemy_type))
@@ -896,7 +900,6 @@ def player_turn(enemy_stats):
     color = '\033[92m'
     options = ['Atacar', 'Objeto']
     while choice != 1 and objeto == 'Salir':
-        os.system('cls')
         delayed_print('Es tu turno.', color=color)
         iterate_options(options, color=color)
         choice = input_with_validation('¿Qué deseas hacer? ', 'No puedes huir de tu destino.',
@@ -955,7 +958,6 @@ def enemy_turn(enemy_stats):
             life -= enemy_attk
     else:
         delayed_print('El enemigo falla el golpe.', color=color)
-        time.sleep(0.5)
     stats = [attk, life, crit]
     if life <= 0:
         life = 0
@@ -1040,3 +1042,4 @@ def dice_roll_simulation(delay=0.1, color = None):
     return dice
 
 
+start_menu()
