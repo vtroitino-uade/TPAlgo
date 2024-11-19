@@ -577,7 +577,7 @@ def game():
     print('Empecemos...')
     time.sleep(1)
 
-    #story(0)
+    story(0)
     create_character_input()
     os.system('cls')
     while END is False:
